@@ -435,7 +435,7 @@ namespace Try_To_ESCAPE__GAME
                             MessageBox.Show("...");
                             MessageBox.Show("...");
                             MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "ON PEUT PASSER À LA DEUXIÈME ÉPREUVE !!!");
+                            Environment.NewLine + Environment.NewLine + "ON PEUT PASSER À LA TROISIÈME ÉPREUVE !!!");
                             MessageBox.Show("LE SORCIER FOU !" +
                             Environment.NewLine + Environment.NewLine + "Qui est le créateur de cet univer ?!");
                         }
@@ -711,7 +711,7 @@ namespace Try_To_ESCAPE__GAME
                         stopRun();
                         if (langue == "fr"){
                             MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "Mainenent que vous avez réussi la deuxième épreuve...");
+                            Environment.NewLine + Environment.NewLine + "Maintenant que vous avez réussi la deuxième épreuve...");
                             MessageBox.Show("...");
                             MessageBox.Show("...");
                             MessageBox.Show("...");
@@ -968,7 +968,7 @@ namespace Try_To_ESCAPE__GAME
             {
                 label13.Text = "Crédits";
                 label10.Text = "Règles";
-                label11.Text = "Il faut s'échapper de ce monde en résoudant toutes les énigmes qui viendrons à se présenter\r\n\r\nSe déplacer : \r\nUtilisez WASD\r\n\r\nLes intéractions se feront toujours avec E";
+                label11.Text = "Il faut s'échapper de ce monde en résolvant toutes les énigmes qui viendrons à se présenter\r\n\r\nSe déplacer : \r\nUtilisez WASD\r\n\r\nLes intéractions se feront toujours avec E";
                 label12.Text = "Retour";
                 button15.Text = "Règles";
                 button14.Text = "Réinitialiser";
@@ -1921,7 +1921,7 @@ namespace Try_To_ESCAPE__GAME
                         
                         cool = true;
                         if (langue == "fr"){
-                            MessageBox.Show("Bravo vous avez gagner au jeu --bataille navale-- !" + // message de si on gagne à la bataille navale en Français.
+                            MessageBox.Show("Bravo vous avez gagné au jeu --bataille navale-- !" + // message de si on gagne à la bataille navale en Français.
                             Environment.NewLine + "Vous pouvez passer à la prochaine épreuve !");
                         }
                         if (langue == "en")
@@ -3592,7 +3592,7 @@ namespace Try_To_ESCAPE__GAME
                             Environment.NewLine +
                             Environment.NewLine + "ReBonjour je vois que vous venez pour essayer de réussir la deuxième épreuve... où vous avez échoué lamentablement..." +
                             Environment.NewLine + "Mais le passé c'est du passé, passons à la deuxième épreuve !" +
-                            Environment.NewLine + "Vous devrez répondre à des questions ! je vous le redis parceque vous êtes encore capable d'oublié..." +
+                            Environment.NewLine + "Vous devrez répondre à des questions !" +
                             Environment.NewLine + Environment.NewLine + "Êtes Vous Prêts  ?!"); }
                         if (langue == "es")
                         {
@@ -3609,7 +3609,7 @@ namespace Try_To_ESCAPE__GAME
                             Environment.NewLine +
                             Environment.NewLine + "Hello see you've come to try and pass the second test... where you failed miserably..." +
                             Environment.NewLine + "But the past is the past, so let's move on to the second test!" +
-                            Environment.NewLine + "You'll have to answer questions! I'm telling you again because you're still capable of forgetting..." +
+                            Environment.NewLine + "You'll have to answer questions!" +
                             Environment.NewLine + Environment.NewLine + "Are you ready?!");
                         }
                         if (langue == "ar")

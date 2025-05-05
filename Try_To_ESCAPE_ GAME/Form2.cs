@@ -469,7 +469,7 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 3 dès aprésent !");
+                            MessageBox.Show("Bravo !! Vous avez trouvé la bonne réponse ! Vous pouvez passer au quiz 3 dès aprésent !");
                             question2 = true;
                             label1.Text = "Commencer Quiz 3";
                             canRun();
