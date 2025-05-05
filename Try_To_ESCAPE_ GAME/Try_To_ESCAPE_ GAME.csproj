@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{45AA697F-B25E-4D92-9817-666B062CD9D4}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Try_To_ESCAPE__GAME</RootNamespace>
+    <AssemblyName>Try_To_ESCAPE_ GAME</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form2.Designer.cs">
+      <DependentUpon>Form2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form3.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form3.Designer.cs">
+      <DependentUpon>Form3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form4.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form4.Designer.cs">
+      <DependentUpon>Form4.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form5.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form5.Designer.cs">
+      <DependentUpon>Form5.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form2.resx">
+      <DependentUpon>Form2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form3.resx">
+      <DependentUpon>Form3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form4.resx">
+      <DependentUpon>Form4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form5.resx">
+      <DependentUpon>Form5.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Background.jpg" />
+    <None Include="Resources\Loupe.png" />
+    <None Include="Resources\Capture-removebg-preview.png" />
+    <None Include="Resources\174096-trouver-indice-gratuit-vectoriel.jpg" />
+    <None Include="Resources\Enregistrement %285%29.wav" />
+    <None Include="Resources\Enregistrement.wav" />
+    <None Include="Resources\Enregistrement %288%29.wav" />
+    <None Include="Resources\Enregistrement %287%29.wav" />
+    <None Include="Resources\Enregistrement %286%29.wav" />
+    <None Include="Resources\Enregistrement %284%29.wav" />
+    <None Include="Resources\Enregistrement %283%29.wav" />
+    <None Include="Resources\Enregistrement %282%29.wav" />
+    <None Include="Resources\chadi_persos.png" />
+    <None Include="Resources\youWIn.wav" />
+    <None Include="Resources\FireBack.png" />
+    <None Include="Resources\fireWall.png" />
+    <None Include="Resources\Yousport.png" />
+    <None Include="Resources\piste_de_course.jpg" />
+    <None Include="Resources\Acclmation.wav" />
+    <None Include="Resources\MinecraftPortal.jpg" />
+    <None Include="Resources\Item get zelda.wav" />
+    <None Include="Resources\cible.png" />
+    <None Include="Resources\Background 4.png" />
+    <None Include="Resources\Do.wav" />
+    <None Include="Resources\Re.wav" />
+    <None Include="Resources\Fa.wav" />
+    <None Include="Resources\Mi.wav" />
+    <None Include="Resources\Sol.wav" />
+    <None Include="Resources\La.wav" />
+    <None Include="Resources\Si.wav" />
+    <None Include="Resources\pinaoPiece.jpeg" />
+    <None Include="Resources\piano.png" />
+    <None Include="Resources\titanic-161614_1280.png" />
+    <None Include="Resources\background 3.png" />
+    <None Include="Resources\door.png" />
+    <None Include="Resources\Background %281%29.png" />
+    <None Include="Resources\Background.png" />
+    <None Include="Resources\drapeau_suisse.png" />
+    <None Include="Resources\Background.jpg" />
+    <None Include="Resources\plancher.jpg" />
+    <None Include="Resources\arbre.png" />
+    <None Include="Resources\poubelle.png" />
+    <None Include="Resources\échelle.png" />
+    <None Include="Resources\boite_carton.png" />
+    <None Include="Resources\confettis.png" />
+    <None Include="Resources\pnj 1.png" />
+    <None Include="Resources\Minecraft paper.png" />
+    <None Include="Resources\table.png" />
+    <None Include="Resources\marteau.png" />
+    <None Include="Resources\Projet_item.png" />
+    <None Include="Resources\Parsons table -11.jpg" />
+    <None Include="Resources\OIP.jpg" />
+    <None Include="Resources\236.jpg" />
+    <None Include="Resources\profil w.png" />
+    <None Include="Resources\profil D.png" />
+    <None Include="Resources\profil A.png" />
+    <None Include="Resources\profil %282%29.png" />
+    <None Include="Resources\profil S.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
