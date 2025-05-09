@@ -429,6 +429,7 @@
             this.panel98.Size = new System.Drawing.Size(796, 498);
             this.panel98.TabIndex = 138;
             this.panel98.Visible = false;
+            this.panel98.Click += new System.EventHandler(this.panel98_Click);
             this.panel98.Paint += new System.Windows.Forms.PaintEventHandler(this.panel98_Paint);
             // 
             // label12
