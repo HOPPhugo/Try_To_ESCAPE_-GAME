@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Background.jpg" />
+    <None Include="Resources\pixil-frame-0 %286%29.png" />
     <None Include="Resources\Loupe.png" />
     <None Include="Resources\Capture-removebg-preview.png" />
     <None Include="Resources\174096-trouver-indice-gratuit-vectoriel.jpg" />

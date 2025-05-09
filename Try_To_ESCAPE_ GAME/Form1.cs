@@ -20,13 +20,12 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Try_To_ESCAPE__GAME
 {
@@ -72,6 +71,7 @@ namespace Try_To_ESCAPE__GAME
         bool labelmr = true; // false le label du marteau n'est pas visible / si true il est visible
         bool labelcl = true;// false le label du bocal n'est pas visible / si true il est visible
         bool moveLeft, moveRight, moveUp, moveDown; // initialisation des mouvements du personnage.
+        string textUse; // variable contenant le texte besoin pour le "CustomMessageBox"
         public Form1()
         {
             InitializeComponent();
@@ -90,7 +90,227 @@ namespace Try_To_ESCAPE__GAME
         {
 
         }
+        public partial class CustomDialogForm : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
 
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(padding, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.OK,
+                    Width = 100,
+                    Height = 30,
+                    Location = new Point((formWidth - 100) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4C, 0xAF, 0x50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK });
+                this.AcceptButton = btnOK;
+
+                // Pour éviter les problèmes de focus
+                btnOK.TabIndex = 0;
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    case "es": return "De acuerdo";
+                    case "ar": return "موافق";
+                    default: return "OK"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
+        }
         private void Key_Down(object sender, KeyEventArgs e)
         {
             
@@ -172,7 +392,7 @@ namespace Try_To_ESCAPE__GAME
 
             
         }
-
+        
 
 
         private void button1_Click(object sender, EventArgs e) // fonction du clique du "button1"
@@ -182,43 +402,39 @@ namespace Try_To_ESCAPE__GAME
             button2.Visible = false;
                 stopRun(); // appelle la fonction StopRun (pour enlever un bug qui nous fait marcher à l'infini)
                 if (langue == "fr"){ // si langue == fr (pour le Français)
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "Donc commençons, mais avant ça je tiens à me présenter !");
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "Je m'appelles LE SORCIER FOU !");
-                    MessageBox.Show("LE SORCIER FOU !" +
-                    Environment.NewLine + Environment.NewLine + "Première épreuve !" +
-                    Environment.NewLine + "Quel est le pays le plus grand du monde ?");
+                    textUse = "???\n\nDonc commençons, mais avant ça je tiens à me présenter !";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "???\n\nJe m'appelles LE SORCIER FOU !";
+                    var r = CustomDialogForm.Show(textUse, langue);
+                    textUse = "LE SORCIER FOU !\n\nPremière épreuve !\nQuel est le pays le plus grand du monde ?";
+                    var a = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")// si langue == es (pour l'espagnole)
                 {
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "Empecemos, pero antes me gustaría presentarme.");
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "¡Me llamo LA BRUJA LOCA!");
-                    MessageBox.Show("¡EL MAGO LOCO!" +
-                    Environment.NewLine + Environment.NewLine + "¡Primera prueba!" +
-                    Environment.NewLine + "¿Cuál es el país más grande del mundo?");
+                    textUse = "???\n\nEmpecemos, pero antes me gustaría presentarme.";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "???\n\n¡Me llamo LA BRUJA LOCA!";
+                    var r = CustomDialogForm.Show(textUse, langue);
+                    textUse = "¡EL MAGO LOCO!\n\n¡Primera prueba!\n¿Cuál es el país más grande del mundo?";
+                    var a = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")// si langue == en (pour l'anglais)
                 {
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "So let's get started, but before that I want to introduce myself!");
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "My name is THE MAD SORCERER!");
-                    MessageBox.Show("THE MAD SORCERER!" +
-                    Environment.NewLine + Environment.NewLine + "First test!" +
-                    Environment.NewLine + "What is the largest country in the world?");
+                    textUse = "???\n\nSo let's get started, but before that I want to introduce myself!";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "???\n\nMy name is THE MAD SORCERER!";
+                    var r = CustomDialogForm.Show(textUse, langue);
+                    textUse = "THE MAD SORCERER!\n\nFirst test!\nWhat is the largest country in the world?";
+                    var a = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")// si langue == ar (pour l'arabe)
                 {
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "لذلك دعونا نبدأ ، لكن قبل ذلك أريد أن أقدم!");
-                    MessageBox.Show("???" +
-                    Environment.NewLine + Environment.NewLine + "اسمي الساحر المجنون!");
-                    MessageBox.Show(" الساحر المجنون!" +
-                    Environment.NewLine + Environment.NewLine + "الاختبار الأول!" +
-                    Environment.NewLine + "ما هي أكبر دولة في العالم؟");
+                    textUse = "???\n\nلذلك دعونا نبدأ ، لكن قبل ذلك أريد أن أقدم";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "???\n\nاسمي الساحر المجنون";
+                    var r = CustomDialogForm.Show(textUse, langue);
+                    textUse = " الساحر المجنون\n\nالاختبار الأول\nما هي أكبر دولة في العالم؟";
+                    var a = CustomDialogForm.Show(textUse, langue);
                 }
                 canRun();
                 if (langue == "fr"){ 
@@ -263,35 +479,31 @@ namespace Try_To_ESCAPE__GAME
                 button2.Visible = false;
                 stopRun();
                 if (langue == "fr"){
-                        MessageBox.Show("LE SORCIER FOU !" +
-                        Environment.NewLine + Environment.NewLine + "Donc commençons !");
-                        MessageBox.Show("LE SORCIER FOU !" +
-                        Environment.NewLine + Environment.NewLine + "Première épreuve..." +
-                        Environment.NewLine + "Quel est le pays le plus grand du monde ? --a mouveau--");
+                        textUse = "LE SORCIER FOU !\n\nDonc commençons !";
+                        var result = CustomDialogForm.Show(textUse, langue);
+                        textUse = "LE SORCIER FOU !\n\nPremière épreuve...\nQuel est le pays le plus grand du monde ?";
+                        var r = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("الساحر المجنون" +
-                    Environment.NewLine + Environment.NewLine + "لذا دعونا نبدأ!");
-                    MessageBox.Show("الساحر المجنون" +
-                    Environment.NewLine + Environment.NewLine + "الاختبار الأول..." +
-                    Environment.NewLine + "ما هي أكبر دولة في العالم؟ --حركة---");
+                    textUse = "الساحر المجنون\n\nلذا دعونا نبدأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "الساحر المجنون\n\n...الاختبار الأول\nهي أكبر دولة في العالم؟";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("THE MAD WIZARD!" +
-                    Environment.NewLine + Environment.NewLine + "So let's get started!");
-                    MessageBox.Show("THE MAD WIZARD!" +
-                    Environment.NewLine + Environment.NewLine + "First test..." +
-                    Environment.NewLine + "What is the largest country in the world? --a movement--");
+                    textUse = "THE MAD WIZARD!\n\nSo let's get started!";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "THE MAD WIZARD!\n\nFirst test...\nWhat is the largest country in the world?";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("¡EL HECHICERO LOCO!" +
-                    Environment.NewLine + Environment.NewLine + "Así que empecemos.");
-                    MessageBox.Show("¡EL HECHICERO LOCO!" +
-                    Environment.NewLine + Environment.NewLine + "Primera prueba..." +
-                    Environment.NewLine + "¿Cuál es el país más grande del mundo? --un movimiento--");
+                    textUse = "¡EL HECHICERO LOCO!\n\nAsí que empecemos.";
+                    var result = CustomDialogForm.Show(textUse, langue);
+                    textUse = "¡EL HECHICERO LOCO!\n\nPrimera prueba...\n¿Cuál es el país más grande del mundo?";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 canRun();
                 if (langue == "fr")
@@ -428,55 +640,56 @@ namespace Try_To_ESCAPE__GAME
                         
                         stopRun();
                         if (langue == "fr"){
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "Mainenent que vous avez réussi la deuxième épreuve...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "ON PEUT PASSER À LA TROISIÈME ÉPREUVE !!!");
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "Qui est le créateur de cet univer ?!");
+                            textUse = "LE SORCIER FOU !\n\nMainenent que vous avez réussi la deuxième épreuve...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            var rx= CustomDialogForm.Show(textUse, langue);
+                            textUse = "LE SORCIER FOU !\n\nON PEUT PASSER À LA TROISIÈME ÉPREUVE !!!";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "LE SORCIER FOU !\n\nQui est le créateur de cet univer ?!";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡EL HECHICERO LOCO!" +
-                            Environment.NewLine + Environment.NewLine + "Ahora que has pasado la segunda prueba...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("¡EL HECHICERO LOCO!" +
-                            Environment.NewLine + Environment.NewLine + "¡¡¡PODEMOS PASAR A LA SEGUNDA RONDA!!!");
-                            MessageBox.Show("¡EL HECHICERO LOCO!" +
-                            Environment.NewLine + Environment.NewLine + "¿Quién es el creador de este universo?");
+                            textUse = "¡EL HECHICERO LOCO!\n\nAhora que has pasado la segunda prueba...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            textUse = "¡EL HECHICERO LOCO!\n\n¡¡¡PODEMOS PASAR A LA SEGUNDA RONDA!!!";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "¡EL HECHICERO LOCO!\n\nQuién es el creador de este universo?";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine + Environment.NewLine + "والآن بعد أن اجتزت الاختبار الثاني...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine + Environment.NewLine + "يمكننا الانتقال إلى الجولة الثانية!!!");
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine + Environment.NewLine + "!من هو خالق هذا الكون؟");
+                            textUse = "الساحر المجنون\n\n...والآن بعد أن اجتزت الاختبار الثاني";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            textUse = "الساحر المجنون\n\nيمكننا الانتقال إلى الجولة الثانية";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "الساحر المجنون\n\nمن هو خالق هذا الكون؟";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine + Environment.NewLine + "Now that you've passed the second test...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine + Environment.NewLine + "WE CAN MOVE ON TO THE SECOND TEST!!!");
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine + Environment.NewLine + "Who is the creator of this universe?!");
+                            textUse = "THE MAD WIZARD!\n\nNow that you've passed the second test...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            textUse = "THE MAD WIZARD!\n\nWE CAN MOVE ON TO THE SECOND TEST!!!";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "THE MAD WIZARD!\n\nWho is the creator of this universe?!";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun(); // appelle la fonction qui permet de recommencer à marcher
                         Question2.Visible = true;
@@ -710,55 +923,57 @@ namespace Try_To_ESCAPE__GAME
                     Question.Visible = false;
                         stopRun();
                         if (langue == "fr"){
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "Maintenant que vous avez réussi la deuxième épreuve...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "ON PEUT PASSER À LA TROISIÈME ÉPREUVE !!!");
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine + Environment.NewLine + "Qui est le créateur de cet univer ?!"); 
+
+                            textUse = "LE SORCIER FOU !\n\nMainenent que vous avez réussi la deuxième épreuve...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            var rx = CustomDialogForm.Show(textUse, langue);
+                            textUse = "LE SORCIER FOU !\n\nON PEUT PASSER À LA TROISIÈME ÉPREUVE !!!";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "LE SORCIER FOU !\n\nQui est le créateur de cet univer ?!";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine + Environment.NewLine + "Now that you've passed the second test...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine + Environment.NewLine + "WE CAN MOVE ON TO THE THIRD ROUND!!!");
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine + Environment.NewLine + "Who is the creator of this universe?!");
+                            textUse = "THE MAD WIZARD!\n\nNow that you've passed the second test...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            textUse = "THE MAD WIZARD!\n\nWE CAN MOVE ON TO THE SECOND TEST!!!";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "THE MAD WIZARD!\n\nWho is the creator of this universe?!";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine + Environment.NewLine + "والآن بعد أن اجتزت الاختبار الثاني...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine + Environment.NewLine + "يمكننا الانتقال إلى الجولة الثالثة!!!");
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine + Environment.NewLine + "!من هو خالق هذا الكون؟");
+                            textUse = "الساحر المجنون\n\n...والآن بعد أن اجتزت الاختبار الثاني";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            textUse = "الساحر المجنون\n\nيمكننا الانتقال إلى الجولة الثانية";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "الساحر المجنون\n\nمن هو خالق هذا الكون؟";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡EL HECHICERO LOCO!" +
-                            Environment.NewLine + Environment.NewLine + "Ahora que has pasado la segunda prueba...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("...");
-                            MessageBox.Show("¡EL HECHICERO LOCO!" +
-                            Environment.NewLine + Environment.NewLine + "¡¡¡PODEMOS PASAR A LA TERCERA RONDA!!!");
-                            MessageBox.Show("¡EL HECHICERO LOCO!" +
-                            Environment.NewLine + Environment.NewLine + "¿Quién es el creador de este universo?");
+                            textUse = "¡EL HECHICERO LOCO!\n\nAhora que has pasado la segunda prueba...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "...";
+                            var r = CustomDialogForm.Show(textUse, langue);
+                            var a = CustomDialogForm.Show(textUse, langue);
+                            var b = CustomDialogForm.Show(textUse, langue);
+                            textUse = "¡EL HECHICERO LOCO!\n\n¡¡¡PODEMOS PASAR A LA SEGUNDA RONDA!!!";
+                            var raw = CustomDialogForm.Show(textUse, langue);
+                            textUse = "¡EL HECHICERO LOCO!\n\nQuién es el creador de este universo?";
+                            var rad = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         textBox1.Visible = true;
@@ -909,23 +1124,23 @@ namespace Try_To_ESCAPE__GAME
         {
             stopRun();
             if (langue == "fr"){
-                MessageBox.Show("???" +
-                Environment.NewLine + Environment.NewLine + "Reviens vites alors, si tu veux finir ce jeu !"); canRun();
+                textUse = "???\n\nReviens vites alors, si tu veux finir ce jeu !";
+                var result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "en")
             {
-                MessageBox.Show("???" +
-                Environment.NewLine + Environment.NewLine + "Come back soon then, if you want to finish this game!"); canRun();
+                textUse = "???\n\nCome back soon then, if you want to finish this game!";
+                var result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "es")
             {
-                MessageBox.Show("???" +
-                Environment.NewLine + Environment.NewLine + "Si quieres terminar este juego, ¡date prisa!"); canRun();
+                textUse = "???\n\nSi quieres terminar este juego, ¡date prisa!";
+                var result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "ar")
             {
-                MessageBox.Show("???" +
-                Environment.NewLine + Environment.NewLine + "أسرع بالعودة إذن، إذا كنت تريد إنهاء اللقاء!"); canRun();
+                textUse = "???\n\nأسرع بالعودة إذن، إذا كنت تريد إنهاء اللقاء";
+                var result = CustomDialogForm.Show(textUse, langue);
             }
             button1.Visible = false;
             button2.Visible = false;
@@ -1921,23 +2136,23 @@ namespace Try_To_ESCAPE__GAME
                         
                         cool = true;
                         if (langue == "fr"){
-                            MessageBox.Show("Bravo vous avez gagné au jeu --bataille navale-- !" + // message de si on gagne à la bataille navale en Français.
-                            Environment.NewLine + "Vous pouvez passer à la prochaine épreuve !");
+                            textUse = "Bravo vous avez gagné au jeu --bataille navale-- !\nVous pouvez passer à la prochaine épreuve !";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("Congratulations on winning the naval battle!" +
-                            Environment.NewLine + "You can move on to the next test!");
+                            textUse = "Congratulations on winning the naval battle!\nYou can move on to the next test!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡Enhorabuena por haber ganado la batalla naval!" +
-                            Environment.NewLine + "Puedes pasar a la siguiente ronda.");
+                            textUse = "¡Enhorabuena por haber ganado la batalla naval!\nPuedes pasar a la siguiente ronda.";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("تهانينا على الفوز بالمعركة البحرية! !" +
-                            Environment.NewLine + "يمكنك الانتقال إلى الجولة التالية!");
+                            textUse = "تهانينا على الفوز بالمعركة البحرية\nيمكنك الانتقال إلى الجولة التالية";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         File.Delete(fileName); // supprime le Fichier entre Paranthèse
@@ -1959,19 +2174,23 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr"){
-                        MessageBox.Show("Bravo ! \n Vous avez le rythme dans la peau ! \n Vous pouvez désormai changer de salle !");
+                        textUse = "Bravo ! \n Vous avez le rythme dans la peau ! \n Vous pouvez désormai changer de salle !";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("¡Bien hecho! \n ¡Llevas el ritmo en la sangre! \n ¡Ya puedes cambiar de local!");
+                        textUse = "¡Bien hecho! \n ¡Llevas el ritmo en la sangre! \n ¡Ya puedes cambiar de local!";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show("برافو! \n الإيقاع يسري في دمك! \n يمكنك الآن تغيير الغرف!");
+                        textUse = "برافو \n الإيقاع يسري في دمك \n يمكنك الآن تغيير الغرف";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Bravo ! \n You've got rhythm in your blood! \n You can change rooms now!");
+                        textUse = "Bravo ! \n You've got rhythm in your blood! \n You can change rooms now!";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     canRun();
                     Papier2.Visible = true;
@@ -2006,19 +2225,24 @@ namespace Try_To_ESCAPE__GAME
             else // si la dernière note n'était pas "si" ou rien
             {
                 if (langue == "fr"){
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 Sound = "";
             }
@@ -2036,27 +2260,24 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr"){
-                        MessageBox.Show("Bravo !" +
-                            Environment.NewLine + "Vous avez le rythme dans la peau !" +
-                            Environment.NewLine + "Vous pouvez désormais changer de salle !");
+
+                        textUse = "Bravo !\nVous avez le rythme dans la peau !\nVous pouvez désormais changer de salle !";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Bravo !" +
-                            Environment.NewLine + "Llevas el ritmo en la sangre." +
-                            Environment.NewLine + "Ya puedes cambiar de habitación.");
+                        textUse = "Bravo !\nLlevas el ritmo en la sangre.\nYa puedes cambiar de habitación.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Well done!" +
-                            Environment.NewLine + "Rhythm is in your blood!" +
-                            Environment.NewLine + "Now you can change rooms!");
+                        textUse = "Well done!\nRhythm is in your blood!\nNow you can change rooms!";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show("أحسنت صنعاً!" +
-                            Environment.NewLine + "الإيقاع يسري في دمك!" +
-                            Environment.NewLine + "يمكنك الآن تغيير الغرف!");
+                        textUse = "أحسنت صنعاً\nالإيقاع يسري في دمك\nيمكنك الآن تغيير الغرف";
+                        var result = CustomDialogForm.Show(textUse, langue);
                     }
                     canRun();
                     Papier2.Visible = true;
@@ -2088,19 +2309,24 @@ namespace Try_To_ESCAPE__GAME
             {
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 Sound = "";
             }
@@ -2119,19 +2345,24 @@ namespace Try_To_ESCAPE__GAME
             {
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 Sound = "";
             }
@@ -2151,19 +2382,24 @@ namespace Try_To_ESCAPE__GAME
                 Sound = "";
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
             }
             
@@ -2181,19 +2417,24 @@ namespace Try_To_ESCAPE__GAME
             {
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 Sound = "";
             }
@@ -2213,19 +2454,24 @@ namespace Try_To_ESCAPE__GAME
                 Sound = "";
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
             }
             
@@ -2243,19 +2489,24 @@ namespace Try_To_ESCAPE__GAME
             {
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 Sound = "";
             }
@@ -2275,19 +2526,23 @@ namespace Try_To_ESCAPE__GAME
                 Sound = "";
                 if (langue == "fr")
                 {
-                    MessageBox.Show("Faux !");
+                    textUse = "Faux !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡Incorrecto!");
+                    textUse = "¡Incorrecto!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("False!");
+                    textUse = "False!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("خطأ!");
+                    textUse = "خطأ";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
             }
             
@@ -2306,55 +2561,39 @@ namespace Try_To_ESCAPE__GAME
                 button3.Enabled = false;
                 stopRun();
                 if (langue == "fr"){
-                    MessageBox.Show("LE SORCIER FOU !" +
-                    Environment.NewLine + Environment.NewLine + "Bravo !  Vous avez réussi cette troisième épreuve avec brio !" +
-                    Environment.NewLine + "Maintenant place à la quatrième énigme...");
+                    textUse = "LE SORCIER FOU !\n\nBravo !  Vous avez réussi cette troisième épreuve avec brio !\nMaintenant place à la quatrième énigme...";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                     Zelda.Play(); // lance le son de "zelda"
-                    MessageBox.Show("LE SORCIER FOU !" +
-                        Environment.NewLine + Environment.NewLine + "Vous devrez changer de salle..." +
-                        Environment.NewLine + "ET TROUVER LE BOUTON QUI SI CACHE !!!" +
-                        Environment.NewLine + "... et j'espere qu'on se reverra bientôt... " +
-                        Environment.NewLine + "Et pour info, les prochaines salle vous devrez vous passer de mon aide et devrez trouver l'énigme avant de la résoudre.");
+                    textUse = "LE SORCIER FOU !\n\nVous devrez changer de salle...\nET TROUVER LE BOUTON QUI SI CACHE !!!\n... et j'espere qu'on se reverra bientôt... \nEt pour info, les prochaines salle vous devrez vous passer de mon aide et devrez trouver l'énigme avant de la résoudre.";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("¡EL MAGO LOCO!" +
-                    Environment.NewLine + Environment.NewLine + "Muy bien.  Has superado esta tercera prueba con nota." +
-                    Environment.NewLine + "Ahora es el momento del cuarto acertijo...");
+                    textUse = "¡EL MAGO LOCO!\n\nBravo !  Muy bien.  Has superado esta tercera prueba con nota.\nAhora es el momento del cuarto acertijo...";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
-                    Zelda.Play();
-                    MessageBox.Show("¡EL MAGO LOCO!" +
-                        Environment.NewLine + Environment.NewLine + "Tendrás que cambiar de habitación..." +
-                        Environment.NewLine + "¡¡¡Y ENCUENTRA EL BOTÓN OCULTO !!!" +
-                        Environment.NewLine + "... y espero que nos volvamos a ver pronto..." +
-                        Environment.NewLine + "Y para que lo sepas, en las próximas salas no necesitarás mi ayuda y tendrás que encontrar el acertijo antes de resolverlo.");
+                    Zelda.Play(); // lance le son de "zelda"
+                    textUse = "¡EL MAGO LOCO!\n\nTendrás que cambiar de habitación...\n¡¡¡Y ENCUENTRA EL BOTÓN OCULTO !!!\n... y espero que nos volvamos a ver pronto... \nY para que lo sepas, en las próximas salas no necesitarás mi ayuda y tendrás que encontrar el acertijo antes de resolverlo.";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("THE MAD WIZARD!" +
-                    Environment.NewLine + Environment.NewLine + "Congratulations!  You've passed this third test with flying colors!" +
-                    Environment.NewLine + "Now it's time for the fourth riddle...");
+                    textUse = "THE MAD WIZARD!\n\nCongratulations!  You've passed this third test with flying colors!\nNow it's time for the fourth riddle...";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
-                    Zelda.Play();
-                    MessageBox.Show("THE MAD WIZARD!" +
-                        Environment.NewLine + Environment.NewLine + "You'll have to change rooms..." +
-                        Environment.NewLine + "AND FIND THE HIDDEN BUTTON!!!" +
-                        Environment.NewLine + "... and I hope to see you soon..." +
-                        Environment.NewLine + "And just so you know, for the next few rooms you'll have to do without my help and will have to find the riddle before you can solve it.");
+                    Zelda.Play(); // lance le son de "zelda"
+                    textUse = "THE MAD WIZARD!\n\nYou'll have to change rooms...\nAND FIND THE HIDDEN BUTTON!!!\n... and I hope to see you soon...\nAnd just so you know, for the next few rooms you'll have to do without my help and will have to find the riddle before you can solve it.";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("الساحر المجنون" +
-                    Environment.NewLine + Environment.NewLine + "أحسنت صنعاً!  لقد نجحت في هذا الاختبار الثالث بامتياز!" +
-                    Environment.NewLine + "والآن حان وقت اللغز الرابع...");
+                    textUse = "الساحر المجنون\n\nأحسنت صنعا  لقد نجحت في هذا الاختبار الثالث بامتياز\n...والآن حان وقت اللغز الرابع";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
-                    Zelda.Play();
-                    MessageBox.Show("الساحر المجنون" +
-                        Environment.NewLine + Environment.NewLine + "سيكون عليك تغيير الغرف..." +
-                        Environment.NewLine + "والعثور على الزر المخفي !!!" +
-                        Environment.NewLine + "... وآمل أن نرى بعضنا البعض مرة أخرى قريبًا..." +
-                        Environment.NewLine + "ولعلمك فقط، في الغرف القليلة القادمة لن تحتاج إلى مساعدتي وسيكون عليك إيجاد اللغز قبل حله.");
+                    Zelda.Play(); // lance le son de "zelda"
+                    textUse = "الساحر المجنون\n\n...سيكون عليك تغيير الغرف\nوالعثور على الزر المخفي\n... وآمل أن نرى بعضنا البعض مرة أخرى قريبًا...\nولعلمك فقط، في الغرف القليلة القادمة لن تحتاج إلى مساعدتي وسيكون عليك إيجاد اللغز قبل حله";
+                    var r = CustomDialogForm.Show(textUse, langue);
                 }
                 canRun();
                 salle2 = true;
@@ -2663,7 +2902,8 @@ namespace Try_To_ESCAPE__GAME
                 DialogResult Language = MessageBox.Show("Choisissez votre langue. \n O = Français \n N = English \n A = + de langues", "Langue", MessageBoxButtons.YesNoCancel);
                 if (Language == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu est déjà en Français.");
+                    textUse = "Votre jeu est déjà en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     langue = "fr";
                     button13.Text = "Langue : Français";
                     fr();
@@ -2671,7 +2911,8 @@ namespace Try_To_ESCAPE__GAME
                 }
                 if (Language == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     langue = "en";
                     button13.Text = "Language : English";
                     en();
@@ -2683,7 +2924,8 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
@@ -2691,15 +2933,17 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
                     if (Language2 == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Votre jeu est resté en Français.");
                         langue = "fr";
+                        textUse = "Votre jeu est resté en Français.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         fr();
                         return;
                     }
@@ -2710,17 +2954,19 @@ namespace Try_To_ESCAPE__GAME
                 DialogResult Language = MessageBox.Show("Choose your language. \n O = Français \n N = English \n A = more languages", "Language", MessageBoxButtons.YesNoCancel);
                 if (Language == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     button13.Text = "Langue : Français";
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     fr();
                     return;
                 }
                 if (Language == DialogResult.No)
                 {
-                    MessageBox.Show("Your game is already in English.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game is already in English.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
@@ -2730,7 +2976,8 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
@@ -2738,15 +2985,17 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
                     if (Language2 == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Your game has remained in English.");
                         langue = "en";
+                        textUse = "Your game has remained in English.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         en();
                         return;
                     }
@@ -2757,17 +3006,19 @@ namespace Try_To_ESCAPE__GAME
                 DialogResult Language = MessageBox.Show("اختر لغتك. \n O = Français \n N = English \n A = المزيد من اللغات", "لُغَةٌ", MessageBoxButtons.YesNoCancel);
                 if (Language == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     button13.Text = "Langue : Français";
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     fr();
                     return;
                 }
                 if (Language == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
@@ -2777,23 +3028,26 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لعبتك باللغة العربية بالفعل");
+                        textUse = "لعبتك باللغة العربية بالفعل";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         ar();
                         return;
                     }
                     if (Language2 == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
                     if (Language2 == DialogResult.Cancel)
                     {
-                        MessageBox.Show("بقيت لعبتك باللغة العربية");
                         ar();
                         langue = "ar";
+                        textUse = "بقيت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         return;
                     }
                 }
@@ -2803,17 +3057,19 @@ namespace Try_To_ESCAPE__GAME
                 DialogResult Language = MessageBox.Show("Elige tu idioma. \n O = Français \n N = English \n A = Más Idioma", "lengua", MessageBoxButtons.YesNoCancel);
                 if (Language == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     button13.Text = "Langue : Français";
                     fr();
                     return;
                 }
                 if (Language == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                         return;
                 }
@@ -2823,7 +3079,8 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
@@ -2831,14 +3088,16 @@ namespace Try_To_ESCAPE__GAME
                     if (Language2 == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ya está en español.");
+                        textUse = "Tu juego ya está en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         es();
                         return;
                     }
                     if (Language2 == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Tu juego ha permanecido en español.");
                         langue = "es";
+                        textUse = "Tu juego ha permanecido en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         es();
                         return;
                     }
@@ -2995,7 +3254,7 @@ namespace Try_To_ESCAPE__GAME
         {
             if (langue == "fr")
             {
-                DialogResult crédits = MessageBox.Show("Réalisateur du jeu : Hugo Schweizer \nGame Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoix : Chadi Toundi \nTête : Chadi Toundi \nTraduction en Arabe : Chadi Toundi ", "Crédits", MessageBoxButtons.OK);
+                DialogResult crédits = MessageBox.Show("Réalisateur du jeu : Hugo Schweizer \nGame Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoix : Chadi Toundi \nTête : Chadi Toundi \nTraduction en Arabe : Chadi Toundi\nContributions créatives : Chadi Toundi ", "Crédits", MessageBoxButtons.OK);
                 if (crédits == DialogResult.OK)
                 {
                     
@@ -3037,20 +3296,25 @@ namespace Try_To_ESCAPE__GAME
                 SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                 Zelda.Play(); // lance le son zelda
                 Target1.Visible = false;
-                if (langue == "fr"){
-                    MessageBox.Show("Bravo vous avez touché toutes les cibles !");
+                if (langue == "fr")
+                {
+                    textUse = "Bravo vous avez touché toutes les cibles !";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("Enhorabuena por alcanzar todos los objetivos.");
+                    textUse = "Enhorabuena por alcanzar todos los objetivos.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("أحسنت في تحقيق جميع الأهداف!");
+                    textUse = "أحسنت في تحقيق جميع الأهداف";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("Bravo, you've hit all the targets!");
+                    textUse = "Bravo, you've hit all the targets!";
+                    var result = CustomDialogForm.Show(textUse, langue);
                 }
                 canRun();
                 Papier3.Visible = true;
@@ -3068,26 +3332,40 @@ namespace Try_To_ESCAPE__GAME
                         panel2.Tag = "";
                         labelmr = false;
                         stopRun();
-                        SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
-                        Zelda.Play();
                         if (langue == "fr"){
-                            MessageBox.Show("Vous avez récupérer...");
-                            MessageBox.Show("Un MARTEAU !");
+                            textUse = "Vous avez Trouvé...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
+                            Zelda.Play();
+                            textUse = "Un MARTEAU !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("Te has recuperado...");
-                            MessageBox.Show("¡UN MARTILLO!");
+                            textUse = "Te has recuperado...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
+                            Zelda.Play();
+                            textUse = "¡UN MARTILLO!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("لقد تعافيت...");
-                            MessageBox.Show("مطرقة!");
+                            textUse = "لقد تعافيت...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
+                            Zelda.Play();
+                            textUse = "مطرقة";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("You've recovered...");
-                            MessageBox.Show("A HAMMER!");
+                            textUse = "You've recovered...";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
+                            Zelda.Play();
+                            textUse = "A HAMMER!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -3099,11 +3377,12 @@ namespace Try_To_ESCAPE__GAME
                         portal = false;
                         interact = false;
                         if (langue == "fr"){
-                            DialogResult TP = MessageBox.Show("Voulez vous changer de monde ?? \n Aucun retour ne sera possible !","Téléportation", MessageBoxButtons.YesNoCancel);
+                            DialogResult TP = MessageBox.Show("Voulez vous changer de monde ?? \n Aucun retour ne sera possible !","Téléportation", MessageBoxButtons.YesNo);
                             if (TP == DialogResult.Yes)
                             {
                                 stopRun();
-                                MessageBox.Show("Vous allez êtres téléporter !\n Attention accrocher vous !");
+                                textUse = "Vous allez êtres téléporter !\n Attention accrocher vous !";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                                 Form2 frm = new Form2();
                                 frm.Show();
@@ -3112,23 +3391,19 @@ namespace Try_To_ESCAPE__GAME
                             if (TP == DialogResult.No)
                             {
                                 stopRun();
-                                MessageBox.Show("Le portail restera ouvert en cas de besoin...");
-                                canRun();
-                            }
-                            if (TP == DialogResult.Cancel)
-                            {
-                                stopRun();
-                                MessageBox.Show("Le portail restera ouvert en cas de besoin...");
+                                textUse = "Le portail restera ouvert en cas de besoin...";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                             }
                         }
                         if (langue == "es")
                         {
-                            DialogResult TP = MessageBox.Show("¿Quieres cambiar el mundo?  \n ¡No hay devoluciones!", "Teletransporte", MessageBoxButtons.YesNoCancel);
+                            DialogResult TP = MessageBox.Show("¿Quieres cambiar el mundo?  \n ¡No hay devoluciones!", "Teletransporte", MessageBoxButtons.YesNo);
                             if (TP == DialogResult.Yes)
                             {
                                 stopRun();
-                                MessageBox.Show("¡Vas a ser teletransportado!\n ¡Agárrate fuerte!");
+                                textUse = "¡Vas a ser teletransportado!\n ¡Agárrate fuerte!";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                                 Form2 frm = new Form2();
                                 frm.Show();
@@ -3137,23 +3412,19 @@ namespace Try_To_ESCAPE__GAME
                             if (TP == DialogResult.No)
                             {
                                 stopRun();
-                                MessageBox.Show("La puerta permanecerá abierta si es necesario...");
-                                canRun();
-                            }
-                            if (TP == DialogResult.Cancel)
-                            {
-                                stopRun();
-                                MessageBox.Show("La puerta permanecerá abierta si es necesario...");
+                                textUse = "La puerta permanecerá abierta si es necesario...";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                             }
                         }
                         if (langue == "ar")
                         {
-                            DialogResult TP = MessageBox.Show("هل تريد تغيير العالم؟  \n لا مجال للتراجع!", "النقل الآني ", MessageBoxButtons.YesNoCancel);
+                            DialogResult TP = MessageBox.Show("هل تريد تغيير العالم؟  \n لا مجال للتراجع!", "النقل الآني ", MessageBoxButtons.YesNo);
                             if (TP == DialogResult.Yes)
                             {
                                 stopRun();
-                                MessageBox.Show("سيتم نقلك فورياً!\n تمسك جيداً!");
+                                textUse = "سيتم نقلك فورياً\n تمسك جيداً";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                                 Form2 frm = new Form2();
                                 frm.Show();
@@ -3162,23 +3433,19 @@ namespace Try_To_ESCAPE__GAME
                             if (TP == DialogResult.No)
                             {
                                 stopRun();
-                                MessageBox.Show("ستبقى البوابة مفتوحة إذا لزم الأمر...");
-                                canRun();
-                            }
-                            if (TP == DialogResult.Cancel)
-                            {
-                                stopRun();
-                                MessageBox.Show("ستبقى البوابة مفتوحة إذا لزم الأمر...");
+                                textUse = "ستبقى البوابة مفتوحة إذا لزم الأمر";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                             }
                         }
                         if (langue == "en")
                         {
-                            DialogResult TP = MessageBox.Show("Do you want to change the world? \n No return possible!", "Teleportation", MessageBoxButtons.YesNoCancel);
+                            DialogResult TP = MessageBox.Show("Do you want to change the world? \n No return possible!", "Teleportation", MessageBoxButtons.YesNo);
                             if (TP == DialogResult.Yes)
                             {
                                 stopRun();
-                                MessageBox.Show("You're going to be teleported!\n Hold on tight!");
+                                textUse = "You're going to be teleported!\n Hold on tight!";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
                                 Form2 frm = new Form2();
                                 frm.Show();
@@ -3187,14 +3454,10 @@ namespace Try_To_ESCAPE__GAME
                             if (TP == DialogResult.No)
                             {
                                 stopRun();
-                                MessageBox.Show("The gate will remain open in case of need...");
+                                textUse = "The gate will remain open in case of need...";
+                                var result = CustomDialogForm.Show(textUse, langue);
                                 canRun();
-                            }
-                            if (TP == DialogResult.Cancel)
-                            {
-                                stopRun();
-                                MessageBox.Show("The gate will remain open in case of need...");
-                                canRun();
+                            
                             }
                         }
                         portal = true;
@@ -3233,23 +3496,24 @@ namespace Try_To_ESCAPE__GAME
                     {
                         stopRun();
                         if (langue == "fr"){
-                            MessageBox.Show("Bravo vous avez trouvé le Premier bouton ! " +
-                                Environment.NewLine + "Maintenant trouvez le deuxième ainsi de suite");
+
+                            textUse = "Bravo vous avez trouvé le Premier bouton !\nMaintenant trouvez le deuxième ainsi de suite ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡Enhorabuena por encontrar el Primer Botón! " +
-                                Environment.NewLine + "Ahora encuentra el segundo y así sucesivamente");
+                            textUse = "¡Enhorabuena por encontrar el Primer Botón!\nAhora encuentra el segundo y así sucesivamente";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("تهانينا على العثور على الزر الأول! " +
-                                Environment.NewLine + "والآن أوجد الثاني وهكذا دواليك");
+                            textUse = "تهانينا على العثور على الزر الأول\nوالآن أوجد الثاني وهكذا دواليك";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("Congratulations on finding the First Button! " +
-                                Environment.NewLine + "Now find the second and so on");
+                            textUse = "Congratulations on finding the First Button!\nNow find the second and so on";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         bouton1 = true;
@@ -3257,20 +3521,25 @@ namespace Try_To_ESCAPE__GAME
                     else if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && bouton1 == true)
                     {
                         stopRun();
-                        if (langue == "fr"){
-                            MessageBox.Show("/--Rien ne ce passe--/");
+                        if (langue == "fr")
+                        {
+                            textUse = "/--Rien ne ce passe--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("/--No pasa nada--/");
+                            textUse = "/--No pasa nada--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("/--لا شيء يحدث");
+                            textUse = "/--لا شيء يحدث";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("/--Nothing happens--/");
+                            textUse = "/--Nothing happens--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -3280,20 +3549,25 @@ namespace Try_To_ESCAPE__GAME
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && bouton1 == true && bouton2 == false) // si on intéragie avec les cartons
                     {
                         stopRun();
-                        if (langue == "fr"){
-                            MessageBox.Show("Bravo vous avez trouvé le deuxième bouton ! ");
+                        if (langue == "fr")
+                        {
+                            textUse = "Bravo vous avez trouvé le deuxième bouton !";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("Enhorabuena por encontrar el segundo botón. ");
+                            textUse = "Enhorabuena por encontrar el segundo botón. ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("Congratulations on finding the second button! ");
+                            textUse = "Congratulations on finding the second button! ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("تهانينا على العثور على الزر الثاني! ");
+                            textUse = "تهانينا على العثور على الزر الثاني";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         bouton2 = true;
                         canRun();
@@ -3303,19 +3577,23 @@ namespace Try_To_ESCAPE__GAME
                         stopRun();
                         if (langue == "fr")
                         {
-                            MessageBox.Show("/--Rien ne ce passe--/");
+                            textUse = "/--Rien ne ce passe--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("/--No pasa nada--/");
+                            textUse = "/--No pasa nada--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("/--لا شيء يحدث");
+                            textUse = "/--لا شيء يحدث";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("/--Nothing happens--/");
+                            textUse = "/--Nothing happens--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -3330,23 +3608,31 @@ namespace Try_To_ESCAPE__GAME
                         papier = papier + 1;
                         if (langue == "fr")
                         {
-                            MessageBox.Show("--Papier + 1--");
-                            MessageBox.Show("Vous êtes à : " + papier + "/??? de papiers !");
+                            textUse = "--Papier + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "Vous êtes à : " + papier + "/??? de papiers !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("--Papel + 1--");
-                            MessageBox.Show("Se encuentra en: " + papier + "/??? ¡Papeles!");
+                            textUse = "--Papel + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "Se encuentra en: " + papier + "/??? ¡Papeles!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("--Paper + 1--");
-                            MessageBox.Show("You have: " + papier + "/??? paper !");
+                            textUse = "--Paper + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "You have: " + papier + "/??? paper !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("--ورق + 1--");
-                            MessageBox.Show("أنت في : " + papier + "/??? أوراق");
+                            textUse = "--ورق + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "أنت في : " + papier + "/??? أوراق";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         paper1lbl.Visible = false;
@@ -3365,25 +3651,33 @@ namespace Try_To_ESCAPE__GAME
                         papier = papier + 1;
                         if (langue == "fr")
                         {
-                            MessageBox.Show("--Papier + 1--");
-                            MessageBox.Show("Vous êtes à : " + papier + "/??? de papiers !");
+                            textUse = "--Papier + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "Vous êtes à : " + papier + "/??? de papiers !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("--Papel + 1--");
-                            MessageBox.Show("Se encuentra en: " + papier + "/??? ¡Papeles!");
+                            textUse = "--Papel + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "Se encuentra en: " + papier + "/??? ¡Papeles!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("--Paper + 1--");
-                            MessageBox.Show("You have: " + papier + "/??? paper !");
+                            textUse = "--Paper + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "You have: " + papier + "/??? paper !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("--ورق + 1--");
-                            MessageBox.Show("أنت في : " + papier + "/??? أوراق");
+                            textUse = "--ورق + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "أنت في : " + papier + "/??? أوراق";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
-                        
+
                         canRun();
                         papier2lbl.Visible = false;
                         Papier2.Visible = false;
@@ -3399,23 +3693,31 @@ namespace Try_To_ESCAPE__GAME
                         papier = papier + 1;
                         if (langue == "fr")
                         {
-                            MessageBox.Show("--Papier + 1--");
-                            MessageBox.Show("Vous êtes à : " + papier + "/??? de papiers !");
+                            textUse = "--Papier + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "Vous êtes à : " + papier + "/??? de papiers !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("--Papel + 1--");
-                            MessageBox.Show("Se encuentra en: " + papier + "/??? ¡Papeles!");
+                            textUse = "--Papel + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "Se encuentra en: " + papier + "/??? ¡Papeles!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("--Paper + 1--");
-                            MessageBox.Show("You have: " + papier + "/??? paper !");
+                            textUse = "--Paper + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "You have: " + papier + "/??? paper !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("--ورق + 1--");
-                            MessageBox.Show("أنت في : " + papier + "/??? أوراق");
+                            textUse = "--ورق + 1--";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                            textUse = "أنت في : " + papier + "/??? أوراق";
+                            var r = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         papier3lbl.Visible = false;
@@ -3430,19 +3732,23 @@ namespace Try_To_ESCAPE__GAME
                     {
                         stopRun();
                         if (langue == "fr"){
-                            MessageBox.Show("Bravo vous avez trouvé le troisième bouton ! ");
+                            textUse = "Bravo vous avez trouvé le troisième bouton ! ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("Enhorabuena por encontrar el tercer botón. ");
+                            textUse = "Enhorabuena por encontrar el tercer botón. ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("Congratulations on finding the third button!");
+                            textUse = "Congratulations on finding the third button! ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("تهانينا على العثور على الزر الثالث! ");
+                            textUse = "تهانينا على العثور على الزر الثالث";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         bouton3 = true;
                         canRun();
@@ -3452,19 +3758,23 @@ namespace Try_To_ESCAPE__GAME
                         stopRun();
                         if (langue == "fr")
                         {
-                            MessageBox.Show("/--Rien ne ce passe--/");
+                            textUse = "/--Rien ne ce passe--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("/--No pasa nada--/");
+                            textUse = "/--No pasa nada--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("/--لا شيء يحدث");
+                            textUse = "/--لا شيء يحدث";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("/--Nothing happens--/");
+                            textUse = "/--Nothing happens--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -3474,24 +3784,25 @@ namespace Try_To_ESCAPE__GAME
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && bouton3 == true && bouton4 == false) // si on intéragie avec le bouton noir
                     {
                         stopRun();
-                        if (langue == "fr"){
-                            MessageBox.Show("Bravo vous avez trouvé le DERNIER bouton ! " +
-                                Environment.NewLine + "Vous pouvez changer de salle");
+                        if (langue == "fr")
+                        {
+                            textUse = "Bravo vous avez trouvé le DERNIER bouton !\nVous pouvez changer de salle";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡Enhorabuena por encontrar el ÚLTIMO botón!" +
-                                Environment.NewLine + "Puede cambiar de habitación");
+                            textUse = "¡Enhorabuena por encontrar el ÚLTIMO botón!\nPuede cambiar de habitación";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("تهانينا على العثور على الزر الأخير! " +
-                                Environment.NewLine + "يمكنك تغيير الغرف");
+                            textUse = "تهانينا على العثور على الزر الأخير\nيمكنك تغيير الغرف";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("Congratulations on finding the LAST button! " +
-                                Environment.NewLine + "You can change rooms");
+                            textUse = "Congratulations on finding the LAST button!\nYou can change rooms";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         bouton4 = true;
@@ -3511,19 +3822,23 @@ namespace Try_To_ESCAPE__GAME
                         stopRun();
                         if (langue == "fr")
                         {
-                            MessageBox.Show("/--Rien ne ce passe--/");
+                            textUse = "/--Rien ne ce passe--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("/--No pasa nada--/");
+                            textUse = "/--No pasa nada--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("/--لا شيء يحدث");
+                            textUse = "/--لا شيء يحدث";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("/--Nothing happens--/");
+                            textUse = "/--Nothing happens--/";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -3536,45 +3851,29 @@ namespace Try_To_ESCAPE__GAME
                         if (langue == "fr"){
                             SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__2_);
                             chadi.Play();
-                            MessageBox.Show("???" +
-                            Environment.NewLine +
-                            Environment.NewLine + "Bonjour je vois que vous venez de réussir la première épreuve ! Félicitation !" +
-                            Environment.NewLine + "Maintenant passons à la deuxième épreuve !" +
-                            Environment.NewLine + "Vous devrez répondre à des questions !" +
-                            Environment.NewLine + Environment.NewLine + "Êtes Vous Prêts  ?!"); 
+                            textUse = "???\n\nBonjour je vois que vous venez de réussir la première épreuve ! Félicitation !\nMaintenant passons à la deuxième épreuve !\nVous devrez répondre à des questions !\nÊtes Vous Prêts  ?!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
                             SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__8_);
                             chadi.Play();
-                            MessageBox.Show("???" +
-                            Environment.NewLine +
-                            Environment.NewLine + "Hola, veo que acabas de pasar la primera prueba. Te felicito." +
-                            Environment.NewLine + "Ahora pasemos a la segunda prueba." +
-                            Environment.NewLine + "Tendrás que responder a algunas preguntas." +
-                            Environment.NewLine + Environment.NewLine + "¿Estás preparado?");
+                            textUse = "???\n\nHola, veo que acabas de pasar la primera prueba. Te felicito.\nAhora pasemos a la segunda prueba.\nTendrás que responder a algunas preguntas.\n¿Estás preparado?";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
                             SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__4_);
                             chadi.Play();
-                            MessageBox.Show("???" +
-                            Environment.NewLine +
-                            Environment.NewLine + "Hello, I see you've just passed the first test! Congratulations!" +
-                            Environment.NewLine + "Now let's move on to the second test!" +
-                            Environment.NewLine + "You'll have to answer questions!" +
-                            Environment.NewLine + Environment.NewLine + "Are you ready?!");
+                            textUse = "???\n\nHello, I see you've just passed the first test! Congratulations!\nNow let's move on to the second test!\nYou'll have to answer questions!\nAre you ready?!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
                             SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__6_);
                             chadi.Play();
-                            MessageBox.Show("???" +
-                            Environment.NewLine +
-                            Environment.NewLine + "مرحباً، أرى أنك اجتزت الاختبار الأول! تهانينا!" +
-                            Environment.NewLine + "والآن لننتقل إلى الاختبار الثاني!" +
-                            Environment.NewLine + "سيكون عليك الإجابة عن بعض الأسئلة!" +
-                            Environment.NewLine + Environment.NewLine + "هل أنت جاهز؟");
+                            textUse = "???\n\nمرحباً، أرى أنك اجتزت الاختبار الأول! تهانينا\nوالآن لننتقل إلى الاختبار الثاني\nسيكون عليك الإجابة عن بعض الأسئلة\nهل أنت جاهز؟";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         button1.Enabled = true;
@@ -3587,39 +3886,37 @@ namespace Try_To_ESCAPE__GAME
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && connaissances == true && question1 == false && soulé == true) // si on a échoué au quiz et qu'on vient le refaire
                     {
                         stopRun();
-                        if (langue == "fr"){
-                            MessageBox.Show("LE SORCIER FOU !" +
-                            Environment.NewLine +
-                            Environment.NewLine + "ReBonjour je vois que vous venez pour essayer de réussir la deuxième épreuve... où vous avez échoué lamentablement..." +
-                            Environment.NewLine + "Mais le passé c'est du passé, passons à la deuxième épreuve !" +
-                            Environment.NewLine + "Vous devrez répondre à des questions !" +
-                            Environment.NewLine + Environment.NewLine + "Êtes Vous Prêts  ?!"); }
+                        if (langue == "fr")
+                        {
+                            textUse = "LE SORCIER FOU !\n\nReBonjour je vois que vous venez pour essayer de réussir la deuxième épreuve... où vous avez échoué lamentablement..." +
+                                "\nMais le passé c'est du passé, passons à la deuxième épreuve !" +
+                                "\nVous devrez répondre à des questions !" +
+                                "\nÊtes Vous Prêts  ?!";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                        }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡EL MAGO LOCO!" +
-                            Environment.NewLine +
-                            Environment.NewLine + "Hola de nuevo, veo que has venido a intentar pasar la segunda prueba... en la que has fracasado estrepitosamente...." +
-                            Environment.NewLine + "Pero el pasado es el pasado, ¡así que pasemos a la segunda prueba!" +
-                            Environment.NewLine + "Te lo repito porque aún eres capaz de olvidarlo..." +
-                            Environment.NewLine + Environment.NewLine + "¿Estás preparado?");
+                            textUse = "¡EL MAGO LOCO!\n\nHola de nuevo, veo que has venido a intentar pasar la segunda prueba... en la que has fracasado estrepitosamente...." +
+                                "\nPero el pasado es el pasado, ¡así que pasemos a la segunda prueba!" +
+                                "\nTe lo repito porque aún eres capaz de olvidarlo..." +
+                                "\n¿Estás preparado?";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("THE MAD WIZARD!" +
-                            Environment.NewLine +
-                            Environment.NewLine + "Hello see you've come to try and pass the second test... where you failed miserably..." +
-                            Environment.NewLine + "But the past is the past, so let's move on to the second test!" +
-                            Environment.NewLine + "You'll have to answer questions!" +
-                            Environment.NewLine + Environment.NewLine + "Are you ready?!");
+                            textUse = "THE MAD WIZARD!\n\nHello see you've come to try and pass the second test... where you failed miserably..." +
+                                "\nBut the past is the past, so let's move on to the second test!" +
+                                "\nYou'll have to answer questions!" +
+                                "\nAre you ready?!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("الساحر المجنون" +
-                            Environment.NewLine +
-                            Environment.NewLine + "مرحباً مرة أخرى، أرى أنك جئت لمحاولة اجتياز الاختبار الثاني الذي فشلت فيه فشلاً ذريعاً." +
-                            Environment.NewLine + "لكن الماضي هو الماضي، لذا دعونا ننتقل إلى الاختبار الثاني!" +
-                            Environment.NewLine + "عليك أن تجيب على الأسئلة! أقول لك مرة أخرى لأنك ما زلت قادرًا على النسيان..." +
-                            Environment.NewLine + Environment.NewLine + "هل أنت جاهز؟");
+                            textUse = "الساحر المجنون\n\nمرحباً مرة أخرى، أرى أنك جئت لمحاولة اجتياز الاختبار الثاني الذي فشلت فيه فشلاً ذريعاً" +
+                                "\nلكن الماضي هو الماضي، لذا دعونا ننتقل إلى الاختبار الثاني" +
+                                "\nعليك أن تجيب على الأسئلة! أقول لك مرة أخرى لأنك ما زلت قادرًا على النسيان" +
+                                "\nهل أنت جاهز؟";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         button1.Enabled = true;
@@ -3638,33 +3935,32 @@ namespace Try_To_ESCAPE__GAME
                             if (langue == "fr"){
                                 SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement);
                                 chadi.Play();
-                                MessageBox.Show("???" +
-                                Environment.NewLine +
-                                Environment.NewLine + "Je ne croix pas que vous ayez les connaissances nécéssaires." + Environment.NewLine + "Revennez plus tard...");
+                                textUse = "???\n\nJe ne croix pas que vous ayez les connaissances nécéssaires." +
+                                    "\nRevennez plus tard...";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             if (langue == "en")
                             {
                                 SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__3_);
                                 chadi.Play();
-                                MessageBox.Show("???" +
-                                Environment.NewLine +
-                                Environment.NewLine + "I don't think you have the necessary knowledge." + Environment.NewLine + "Come back later...");
+                                textUse = "???\n\nI don't think you have the necessary knowledge." +
+                                    "\nCome back later...";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             if (langue == "es")
                             {
                                 SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__7_);
                                 chadi.Play();
-                                MessageBox.Show("???" +
-                                Environment.NewLine +
-                                Environment.NewLine + "No creo que tengas los conocimientos necesarios." + Environment.NewLine + "Vuelve más tarde...");
+                                textUse = "???\n\nNo creo que tengas los conocimientos necesarios." +
+                                    "\nVuelve más tarde...";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             if (langue == "ar")
                             {
                                 SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__5_);
                                 chadi.Play();
-                                MessageBox.Show("???" +
-                                Environment.NewLine +
-                                Environment.NewLine + "لا أعتقد أن لديك المعرفة اللازمة." + Environment.NewLine + "عُد لاحقاً...");
+                                textUse = "???\n\nلا أعتقد أن لديك المعرفة اللازمة" +
+                                    "\nعُد لاحقاً";
                             }
                             canRun();
                         }
@@ -3674,27 +3970,28 @@ namespace Try_To_ESCAPE__GAME
                             if (rage2 <= 2){ // si je parle au PNJ moins de trois fois sans avoir lu la feuille après l'avoir cassée
                                 stopRun();
                                 if (langue == "fr"){
-                                    MessageBox.Show("???" +
-                                    Environment.NewLine +
-                                    Environment.NewLine + "ALLEZ LIRE CETTE PURÉE DE FEUILLE !!!!!" + Environment.NewLine + Environment.NewLine + "Puis revenez me voir, bonne suite.");
+
+                                    textUse = "???\n\nALLEZ LIRE CETTE PURÉE DE FEUILLE !!!!!" +
+                                        "\nPuis revenez me voir, bonne suite.";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "es")
                                 {
-                                    MessageBox.Show("???" +
-                                    Environment.NewLine +
-                                    Environment.NewLine + "¡¡¡¡¡VE Y LEE ESTA HOJA !!!!!" + Environment.NewLine + Environment.NewLine + "Entonces vuelve a verme.");
+                                    textUse = "???\n\n¡¡¡¡¡VE Y LEE ESTA HOJA !!!!!" +
+                                        "\nEntonces vuelve a verme.";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "en")
                                 {
-                                    MessageBox.Show("???" +
-                                    Environment.NewLine +
-                                    Environment.NewLine + "GO READ THIS LEAF !!!!!" + Environment.NewLine + Environment.NewLine + "Then come back and see me.");
+                                    textUse = "???\n\nGO READ THIS PAPER !!!!!" +
+                                        "\nThen come back and see me.";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "ar")
                                 {
-                                    MessageBox.Show("???" +
-                                    Environment.NewLine +
-                                    Environment.NewLine + "اذهب واقرأ هذه الورقة !!!!!" + Environment.NewLine + Environment.NewLine + "ثم عد لرؤيتي.");
+                                    textUse = "???\n\nاذهب واقرأ هذه الورقة" +
+                                        "\nثم عد لرؤيتي";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 canRun();
                             }
@@ -3702,20 +3999,25 @@ namespace Try_To_ESCAPE__GAME
                             if (rage2 >= 3) // si je parle 3 fois au PNJ sans avoir lu la feuille après l'avoir cassée
                             {
                                 stopRun();
-                                if (langue == "fr"){
-                                    MessageBox.Show("LE SORCIER FOU ! \n \n ALLEZ VOUS EN !!");
+                                if (langue == "fr")
+                                {
+                                    textUse = "LE SORCIER FOU !\n\nALLEZ VOUS EN !!";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "es")
                                 {
-                                    MessageBox.Show("¡EL MAGO LOCO! \n \n ¡¡VETE!!");
+                                    textUse = "¡EL MAGO LOCO!\n\n¡¡VETE!!";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "ar")
                                 {
-                                    MessageBox.Show("الساحر المجنون \n \n!!ابتعد");
+                                    textUse = "الساحر المجنون\n\nابتعد";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "en")
                                 {
-                                    MessageBox.Show("THE MAD WIZARD! \n \n GO AWAY!!");
+                                    textUse = "THE MAD WIZARD!\n\nGO AWAY!!";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 this.Close();
                             }
@@ -3738,24 +4040,29 @@ namespace Try_To_ESCAPE__GAME
                             if (soulé == false){
                             question1 = false;
                                 stopRun();
-                                if (langue == "fr"){
-                                    MessageBox.Show("LE SORCIER FOU !" +
-                                    Environment.NewLine + Environment.NewLine + "PFFFF.." + Environment.NewLine + "Recommencez... vous me saoulez");
+                                if (langue == "fr")
+                                {
+                                    textUse = "LE SORCIER FOU !\n\nPFFFF..\n" +
+                                    "Recommencez... vous me saoulez";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "es")
                                 {
-                                    MessageBox.Show("¡EL MAGO LOCO!" +
-                                    Environment.NewLine + Environment.NewLine + "PFFFF.." + Environment.NewLine + "Hazlo otra vez... me estás poniendo de los nervios.");
+                                    textUse = "¡EL MAGO LOCO!\n\nPFFFF..\n" +
+                                    "Hazlo otra vez... me estás poniendo de los nervios.";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "en")
                                 {
-                                    MessageBox.Show("THE MAD WIZARD!" +
-                                    Environment.NewLine + Environment.NewLine + "PFFFF.." + Environment.NewLine + "Do it again... you're boring me.");
+                                    textUse = "THE MAD WIZARD!\n\nPFFFF..\n" +
+                                    "Do it again... you're boring me.";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
                                 if (langue == "ar")
                                 {
-                                    MessageBox.Show("الساحر المجنون" +
-                                    Environment.NewLine + Environment.NewLine + "PFFFF.." + Environment.NewLine + "افعلها مرة أخرى ... أنت تثير أعصابي");
+                                    textUse = "الساحر المجنون\n\nPFFFF..\n" +
+                                    "افعلها مرة أخرى ... أنت تثير أعصابي";
+                                    var result = CustomDialogForm.Show(textUse, langue);
                                 }
 
                                 canRun();
@@ -3786,20 +4093,25 @@ namespace Try_To_ESCAPE__GAME
                     {
                         bocal.Image = Properties.Resources.Minecraft_paper;
                         stopRun();
-                        if (langue == "fr"){
-                            MessageBox.Show("Vous avez cassé le verre, intéragissez avec la feuille pour lire");
+                        if (langue == "fr")
+                        {
+                            textUse = "Vous avez cassé le verre, intéragissez avec la feuille pour lire";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("Has roto el cristal, interactúa con la hoja para leer");
+                            textUse = "Has roto el cristal, interactúa con la hoja para leer";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("You've broken the glass, interact with the leaf to read");
+                            textUse = "You've broken the glass, interact with the leaf to read";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("لقد كسرت الزجاج، تفاعل مع الورقة لتقرأ");
+                            textUse = "لقد كسرت الزجاج، تفاعل مع الورقة لتقرأ";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                         bocalcassé = true;
@@ -3809,20 +4121,25 @@ namespace Try_To_ESCAPE__GAME
                     {
 
                         stopRun();
-                        if (langue == "fr"){
-                            MessageBox.Show("Il vous manque quelque chose...");
+                        if (langue == "fr")
+                        {
+                            textUse = "Il vous manque quelque chose...";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("Te estás perdiendo algo...");
+                            textUse = "Te estás perdiendo algo...";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("You're missing something...");
+                            textUse = "You're missing something...";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("لقد فاتك شيء ما...");
+                            textUse = "لقد فاتك شيء ما";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -3842,32 +4159,37 @@ namespace Try_To_ESCAPE__GAME
                             label5.Visible = false;
                             
                             stopRun();
-                            if (langue == "fr"){
-                                MessageBox.Show("Si vous lisez se message, c'est que vous avez réussi la première épreuve --Casser la cloche--." +
-                                Environment.NewLine + "Allez parler à ce vieux monsieur, il saura vous aidez pour sortir de ce jeux." +
-                                Environment.NewLine + "Je n'ai qu'un indice pour vous << Les papiers sont la clés >>" +
-                                Environment.NewLine + "Ne perdez pas votre temps, surtout pour l'épreuve suivante !");
+                            if (langue == "fr")
+                            {
+                                textUse = "Si vous lisez se message, c'est que vous avez réussi la première épreuve --Casser la cloche--.\n" +
+                                    "Allez parler à ce vieux monsieur, il saura vous aidez pour sortir de ce jeux.\n" +
+                                    "Je n'ai qu'un indice pour vous << Les papiers sont la clés >>\n" +
+                                    "Ne perdez pas votre temps, surtout pour l'épreuve suivante !";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             if (langue == "es")
                             {
-                                MessageBox.Show("Si estás leyendo este mensaje, es que has superado la primera prueba: romper la campana." +
-                                Environment.NewLine + "Ve a hablar con este anciano, él podrá ayudarte a salir de este juego." +
-                                Environment.NewLine + "Sólo tengo una pista para ti <<Los papeles son la clave >>" +
-                                Environment.NewLine + "No pierdas el tiempo, ¡sobre todo para el próximo examen!");
+                                textUse = "Si estás leyendo este mensaje, es que has superado la primera prueba: romper la campana.\n" +
+                                    "Ve a hablar con este anciano, él podrá ayudarte a salir de este juego.\n" +
+                                    "Sólo tengo una pista para ti <<Los papeles son la clave >>\n" +
+                                    "No pierdas el tiempo, ¡sobre todo para el próximo examen!";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             if (langue == "en")
                             {
-                                MessageBox.Show("If you're reading this message, you've passed the first test - Breaking the bell." +
-                                Environment.NewLine + "Go and talk to this old man, he'll be able to help you get out of this game." +
-                                Environment.NewLine + "I've only got one clue for you << Papers are the key >>" +
-                                Environment.NewLine + "Don't waste your time, especially for the next test!");
+                                textUse = "If you're reading this message, you've passed the first test - Breaking the bell.\n" +
+                                    "Go and talk to this old man, he'll be able to help you get out of this game.\n" +
+                                    "I've only got one clue for you << Papers are the key >>\n" +
+                                    "Don't waste your time, especially for the next test!";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             if (langue == "ar")
                             {
-                                MessageBox.Show("إذا كنت تقرأ هذه الرسالة ، فهذا يعني أنك نجحت في الاختبار الأول - كسر الجرس--." +
-                                Environment.NewLine + "اذهب وتحدث إلى هذا الرجل العجوز، سيكون قادرًا على مساعدتك في الخروج من هذه اللعبة." +
-                                Environment.NewLine + "لدي تلميح واحد فقط لك <<الأوراق هي المفتاح >>" +
-                                Environment.NewLine + "لا تضيع وقتك، خاصة في الاختبار التالي!");
+                                textUse = "إذا كنت تقرأ هذه الرسالة ، فهذا يعني أنك نجحت في الاختبار الأول - كسر الجرس\n" +
+                                    "اذهب وتحدث إلى هذا الرجل العجوز، سيكون قادرًا على مساعدتك في الخروج من هذه اللعبة\n" +
+                                    "لدي تلميح واحد فقط لك <<الأوراق هي المفتاح\n" +
+                                    "لا تضيع وقتك، خاصة في الاختبار التالي";
+                                var result = CustomDialogForm.Show(textUse, langue);
                             }
                             canRun();
                             connaissances = true;

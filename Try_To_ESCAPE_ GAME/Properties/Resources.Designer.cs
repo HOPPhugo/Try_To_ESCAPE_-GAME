@@ -409,6 +409,16 @@ namespace Try_To_ESCAPE__GAME.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap pixil_frame_0__6_ {
+            get {
+                object obj = ResourceManager.GetObject("pixil_frame_0__6_", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap plancher {
             get {
                 object obj = ResourceManager.GetObject("plancher", resourceCulture);
