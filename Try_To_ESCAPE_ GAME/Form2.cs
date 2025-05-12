@@ -16,12 +16,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 
 namespace Try_To_ESCAPE__GAME
 {
@@ -34,6 +31,7 @@ namespace Try_To_ESCAPE__GAME
         bool question3 = false; // false : pas répondu juste à la troisième question / True : Répondu juste à la troisième question
         bool monde3 = false; // false : Monde trois pas débloquer / True : monde trois débloquer (répndu à toutes les questions juste)
         bool question4 = false; // false : pas répondu juste à la quatrième question / True : Répondu juste à la quatrième question
+        string textUse; // variable contenant le texte besoin pour le "CustomMessageBox"
         string langue = "fr"; // langue choisie par l'utilisateur dans le menu
         bool question5 = false; // false : pas répondu juste à la cinquième question / True : Répondu juste à la cinquième question
         bool question6 = false; // false : pas répondu juste à la sixième question / True : Répondu juste à la sixième question 
@@ -67,6 +65,735 @@ namespace Try_To_ESCAPE__GAME
         private void Form2_Load(object sender, EventArgs e)
         {
 
+        }
+        public partial class CustomDialogForm : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
+
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(padding, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.OK,
+                    Width = 100,
+                    Height = 30,
+                    Location = new Point((formWidth - 100) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+                int newSize = 12;
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+                btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
+                btnOK.MouseLeave += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, 8);
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK });
+                this.AcceptButton = btnOK;
+
+                // Pour éviter les problèmes de focus
+                btnOK.TabIndex = 0;
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    case "es": return "De acuerdo";
+                    case "ar": return "موافق";
+                    default: return "OK"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
+        }
+        public partial class CustomDialogForm3 : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
+
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm3()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm3(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+                this.MinimumSize = new System.Drawing.Size(170, 20);
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(+25, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+                Button btnNo = new Button
+                {
+                    DialogResult = DialogResult.No,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth + 0) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText2(langue)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.Yes,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth - 150) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+                int newSize = 12;
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+                btnNo.MouseMove += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, newSize);
+                btnNo.MouseLeave += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, 8);
+                btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
+                btnOK.MouseLeave += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, 8);
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK, btnNo });
+
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Yes"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText1(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Cancel"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText2(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "No"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // fluidifie
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm3 form = new CustomDialogForm3(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm3 form = new CustomDialogForm3(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm3 form = new CustomDialogForm3(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
+        }
+        public partial class CustomDialogForm2 : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
+
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm2()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm2(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+                this.MinimumSize = new System.Drawing.Size(270, 20);
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(+50, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+                Button btnCancel = new Button
+                {
+                    DialogResult = DialogResult.Cancel,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth + 165) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText1(langue)
+                };
+                Button btnNo = new Button
+                {
+                    DialogResult = DialogResult.No,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth + 0) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText2(langue)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.OK,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth - 165) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+                int newSize = 12;
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+                btnCancel.MouseMove += (s, e) => btnCancel.Font = new Font(btnCancel.Font.FontFamily, newSize);
+                btnCancel.MouseLeave += (s, e) => btnCancel.Font = new Font(btnCancel.Font.FontFamily, 8);
+                btnNo.MouseMove += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, newSize);
+                btnNo.MouseLeave += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, 8);
+                btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
+                btnOK.MouseLeave += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, 8);
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK, btnCancel, btnNo });
+
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Yes"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText1(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Cancel"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText2(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "No"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // fluidifie
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm2 form = new CustomDialogForm2(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm2 form = new CustomDialogForm2(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm2 form = new CustomDialogForm2(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
         }
         private void Key_Down(object sender, KeyEventArgs e)
         {
@@ -151,102 +878,116 @@ namespace Try_To_ESCAPE__GAME
                     {
                         stopRun();
                         if (langue == "fr"){
-                            MessageBox.Show("LE SORCIER FOU !\n" + "\n" +
-                                "Bravo Vous avez réussi toutes les salles du premier monde !\n Vous voilà dans un monde nouveau où vous aurez plusieur quiz ! et si vous perdez vous devrez TOUT RECOMMENCER !!!");
+                            textUse = "LE SORCIER FOU !\n\nBravo Vous avez réussi toutes les salles du premier monde !\n Vous voilà dans un monde nouveau où vous aurez plusieur quiz ! et si vous perdez vous devrez TOUT RECOMMENCER !!!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡EL HECHICERO LOCO!\n" + "\n" +
-                                "¡Bravo Has triunfado en todas las habitaciones del primer mundo!\n ¡Ahora estás en un nuevo mundo donde tendrás varios cuestionarios! y si pierdes tendrás que EMPEZAR DE NUEVO!!");
+                            textUse = "¡EL HECHICERO LOCO!\n\n¡Bravo Has triunfado en todas las habitaciones del primer mundo!\n ¡Ahora estás en un nuevo mundo donde tendrás varios cuestionarios! y si pierdes tendrás que EMPEZAR DE NUEVO!!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("THE MAD SORCERER!\n" + "\n" +
-                                "Bravo You have succeeded in all the rooms of the first world!\n You are now in a new world where you will have several quizzes! and if you lose you will have to START ALL OVER !!");
+                            textUse = "THE MAD SORCERER!\n\nBravo You have succeeded in all the rooms of the first world!\n You are now in a new world where you will have several quizzes! and if you lose you will have to START ALL OVER !!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("!الساحر المجنون\n" + "\n" +
-                                "أحسنت، لقد أكملت جميع الغرف في العالم الأول.\n ها أنت ذا في عالم جديد حيث سيكون عليك اجتياز مجموعة كاملة من الاختبارات! وإذا خسرت، سيكون عليك البدء من جديد");
+                            textUse = "!الساحر المجنون\n\nأحسنت، لقد أكملت جميع الغرف في العالم الأول.\n ها أنت ذا في عالم جديد حيث سيكون عليك اجتياز مجموعة كاملة من الاختبارات! وإذا خسرت، سيكون عليك البدء من جديد";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();                    
                     }
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && question7 == true && level2 == false) // si on parle au PNJ après avoir réussi son quiz
                     {
                         stopRun();
-                        if (langue == "fr") {
-                            MessageBox.Show("LE SORCIER FOU !\n" + "\n" +
-                                "Bravo Vous avez réussi mon quiz de géni !\n souhaitez vous passer au niveau supérieure ?!");
+                        if (langue == "fr")
+                        {
+                            textUse = "LE SORCIER FOU !\n\nBravo Vous avez réussi mon quiz de géni !\n souhaitez vous passer au niveau supérieure ?!";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("¡EL MAGO LOCO!\n" + "\n" +
-                                "Bien hecho ¡Has superado mi brillante cuestionario!\n ¿Le gustaría pasar al siguiente nivel?");
+                            textUse = "¡EL MAGO LOCO!\n\nBien hecho ¡Has superado mi brillante cuestionario!\n ¿Le gustaría pasar al siguiente nivel?";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("THE MAD WIZARD!\n" + "\n" +
-                                "Well done, you've passed my test with flying colours!\n Would you like to take your business to the next level?");
+                            textUse = "THE MAD WIZARD!\n\nWell done, you've passed my test with flying colours!\n Would you like to take your business to the next level?";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("الساحر المجنون\n" + "\n" +
-                                "أحسنت لقد نجحت في اختباري الرائع\n هل ترغب في الانتقال إلى المستوى التالي؟");
-                        }
+                            textUse = "الساحر المجنون\n\nأحسنت لقد نجحت في اختباري الرائع\n هل ترغب في الانتقال إلى المستوى التالي؟";
+                            var result = CustomDialogForm.Show(textUse, langue);
+                       }
 
                         if (langue == "fr"){
-                            DialogResult Level2 = MessageBox.Show("souhaitez vous passer au niveau supérieure ?!", "LE SORCIER FOU !", MessageBoxButtons.YesNo);
-                            if (Level2 == DialogResult.Yes)
+
+                            textUse = "souhaitez vous passer au niveau supérieure ?! -- LE SORCIER FOU ! --";
+                            var result = CustomDialogForm3.Show(textUse, langue);
+                            if (result == DialogResult.Yes)
                             {
-                                MessageBox.Show("La prochaine épreuve est une course à pieds ! \n vous devrez appuyer sur LMB (Left Mouse Button) pour augmenter votre vitesse ! \n Bonne Chance ^^");
-                               level2 = true;
+                                textUse = "La prochaine épreuve est une course à pieds ! \n vous devrez appuyer sur LMB (Left Mouse Button) pour augmenter votre vitesse ! \n Bonne Chance ^^";
+                                var r = CustomDialogForm.Show(textUse, langue);
+                                level2 = true;
                                 label1.Text = "NIVEAU 2";
                             }
-                            if (Level2 == DialogResult.No)
+                            if (result == DialogResult.No)
                             {
-                                MessageBox.Show("Revenez me voir si vous le souhaitez...");
+                                textUse = "Revenez me voir si vous le souhaitez...";
+                                var r = CustomDialogForm.Show(textUse, langue);
                             }
                         }
                         if (langue == "es")
                         {
-                            DialogResult Level2 = MessageBox.Show("¿Le gustaría pasar al siguiente nivel?", "¡EL HECHICERO LOCO!", MessageBoxButtons.YesNo);
-                            if (Level2 == DialogResult.Yes)
+                            textUse = "¿Le gustaría pasar al siguiente nivel? -- ¡EL HECHICERO LOCO! --";
+                            var result = CustomDialogForm3.Show(textUse, langue);
+                            if (result == DialogResult.Yes)
                             {
-                                MessageBox.Show("El próximo evento es una carrera a pie. \n ¡tendrás que pulsar LMB (botón izquierdo del ratón) para aumentar tu velocidad! \n Buena suerte ^^");
+                                textUse = "El próximo evento es una carrera a pie. \n ¡tendrás que pulsar LMB (botón izquierdo del ratón) para aumentar tu velocidad! \n Buena suerte ^^";
+                                var r = CustomDialogForm.Show(textUse, langue);
                                 level2 = true;
                                 label1.Text = "NIVEL 2";
                             }
-                            if (Level2 == DialogResult.No)
+                            if (result == DialogResult.No)
                             {
-                                MessageBox.Show("Ven a verme otra vez si quieres...");
+                                textUse = "Ven a verme otra vez si quieres...";
+                                var r = CustomDialogForm.Show(textUse, langue);
                             }
                         }
                         if (langue == "en")
                         {
-                            DialogResult Level2 = MessageBox.Show("Would you like to go to the next level?", "THE MAD WIZARD!", MessageBoxButtons.YesNo);
-                            if (Level2 == DialogResult.Yes)
+                            textUse = "Would you like to go to the next level? -- THE MAD WIZARD! --";
+                            var result = CustomDialogForm3.Show(textUse, langue);
+                            if (result == DialogResult.Yes)
                             {
-                                MessageBox.Show("The next event is a foot race! \n you'll have to press LMB (Left Mouse Button) to increase your speed! \n Good Luck ^^");
-                                level2 = true;
+                                textUse = "The next event is a foot race! \n you'll have to press LMB (Left Mouse Button) to increase your speed! \n Good Luck ^^";
+                                var r = CustomDialogForm.Show(textUse, langue);
+                               level2 = true;
                                 label1.Text = "LEVEL 2";
                             }
-                            if (Level2 == DialogResult.No)
+                            if (result == DialogResult.No)
                             {
-                                MessageBox.Show("Come and see me again if you like...");
+                                textUse = "Come and see me again if you like...";
+                                var r = CustomDialogForm.Show(textUse, langue);
                             }
                         }
                         if (langue == "ar")
                         {
-                            DialogResult Level2 = MessageBox.Show("هل ترغب في الانتقال إلى المستوى التالي؟", "الساحر المجنون", MessageBoxButtons.YesNo);
-                            if (Level2 == DialogResult.Yes)
+                            textUse = "-- هل ترغب في الانتقال إلى المستوى التالي؟ -- الساحر المجنون ";
+                            var result = CustomDialogForm3.Show(textUse, langue);
+                            if (result == DialogResult.Yes)
                             {
-                                MessageBox.Show("الفعالية التالية هي سباق على الأقدام  \n اضغط على LMB (زر الماوس الأيسر) لزيادة سرعتك  \n ^^حظاً موفقاً! ");
+                                textUse = "الفعالية التالية هي سباق على الأقدام  \n اضغط على LMB (زر الماوس الأيسر) لزيادة سرعتك  \n ^^حظاً موفقاً! ";
+                                var r = CustomDialogForm.Show(textUse, langue);
                                 level2 = true;
                                 label1.Text = "المستوى 2";
                             }
-                            if (Level2 == DialogResult.No)
+                            if (result == DialogResult.No)
                             {
-                                MessageBox.Show("عُد لرؤيتي إذا كنت ترغب في ذلك");
+                                textUse = "عُد لرؤيتي إذا كنت ترغب في ذلكs";
+                                var r = CustomDialogForm.Show(textUse, langue);
                             }
                         }
                         canRun();
@@ -254,20 +995,25 @@ namespace Try_To_ESCAPE__GAME
                     else if (level2 == true) // si on parle au PNJ après lui avoir parler
                     {
                         stopRun();
-                        if (langue == "fr") {
-                            MessageBox.Show("Je n'ai rien à vous dire...");
+                        if (langue == "fr")
+                        {
+                            textUse = "Je n'ai rien à vous dire...";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            MessageBox.Show("No tengo nada que decirte...");
+                            textUse = "No tengo nada que decirte...";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            MessageBox.Show("...ليس لدي ما أقوله لك");
+                            textUse = "...ليس لدي ما أقوله لك";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            MessageBox.Show("I've got nothing to say to you...");
+                            textUse = "I've got nothing to say to you...";
+                            var result = CustomDialogForm.Show(textUse, langue);
                         }
                         canRun();
                     }
@@ -343,27 +1089,31 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr")
                     {
-                        DialogResult day = MessageBox.Show("Qu'est ce que L'hippopotomonstrosesquippedaliophobie \n\n O = La peure des monstres \n N = La peure des animaux géants \n A = La peure des mots longs ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (day == DialogResult.Yes)
+                        textUse = "Qu'est ce que L'hippopotomonstrosesquippedaliophobie \n\n Y = La peure des monstres \n N = La peure des animaux géants \n C = La peure des mots longs  \n  QUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (day == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
 
                             return;
                         }
-                        if (day == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 2 dès aprésent !");
+                            textUse = "Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 2 dès aprésent !";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             question1 = true;
                             label1.Text = "Commencer le Quiz 2";
@@ -372,27 +1122,31 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        DialogResult day = MessageBox.Show("¿Qué es la hipopotomonstrosesquippedaliofobia? \n\n O = El miedo a los monstruos \n N = El miedo a los animales gigantes \n A = El miedo a las palabras largas ", "QUIZ  --  ¡EL MAGO LOCO! !", MessageBoxButtons.YesNoCancel);
-                        if (day == DialogResult.Yes)
+                        textUse = "¿Qué es la hipopotomonstrosesquippedaliofobia? \n\n Y = El miedo a los monstruos \n N = El miedo a los animales gigantes \n C = El miedo a las palabras largas \n QUIZ  ---  ¡EL MAGO LOCO! ";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (day == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
 
                             return;
                         }
-                        if (day == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 2.");
+                            textUse = "¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 2.";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             question1 = true;
                             label1.Text = "Iniciar Cuestionario 2";
@@ -401,27 +1155,31 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        DialogResult day = MessageBox.Show("What is hippopotomonstrosesquippedaliophobia? \n\n O = The fear of monsters \n N = The fear of giant animals \n A = The fear of long words ", "QUIZ  -- THE MAD WIZZARD!", MessageBoxButtons.YesNoCancel);
-                        if (day == DialogResult.Yes)
+                        textUse = "What is hippopotomonstrosesquippedaliophobia? \n\n Y = The fear of monsters \n N = The fear of giant animals \n C = The fear of long words \n QUIZ  --- THE MAD WIZZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (day == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
 
                             return;
                         }
-                        if (day == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Congratulations! You've found the right answer! You can now go on to quiz 2!");
+                            textUse = "Congratulations! You've found the right answer! You can now go on to quiz 2!";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             question1 = true;
                             label1.Text = "Start Quiz 2";
@@ -430,27 +1188,31 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        DialogResult day = MessageBox.Show("ما هو رهاب فرس النهر؟ \n\n O = الخوف من الوحوش \n N = الخوف من الحيوانات العملاقة \n A = الخوف من الكلمات الطويلة ", "مسابقة - الساحر المجنون", MessageBoxButtons.YesNoCancel);
-                        if (day == DialogResult.Yes)
+                        textUse = "ما هو رهاب فرس النهر؟ \n\n Y = الخوف من الوحوش \n N = الخوف من الحيوانات العملاقة \n C = الخوف من الكلمات الطويلة \n مسابقة --- الساحر المجنون";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("خطأ!");
+                            textUse = "خطأ";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (day == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
-                            MessageBox.Show("خطأ!");
+                            textUse = "خطأ";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
 
                             return;
                         }
-                        if (day == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("!أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 2");
+                            textUse = "!أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 2";
+                            var r = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             question1 = true;
                             label1.Text = "بدء الاختبار 2";
@@ -462,29 +1224,34 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr")
-                    {
-                        MessageBox.Show("Quiz 2 :");
-                        DialogResult Hawaï = MessageBox.Show("Hawaï appartient à quel pays ? \n\n O = États-Unis \n N = Amérique du sud \n A = Asie ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (Hawaï == DialogResult.Yes)
+                    { 
+                        textUse = "Quiz 2 :";
+                        var r = CustomDialogForm.Show(textUse, langue);
+                        textUse = "Hawaï appartient à quel pays ? \n\n Y = États-Unis \n N = Amérique du sud \n C = Asie \n QUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouvé la bonne réponse ! Vous pouvez passer au quiz 3 dès aprésent !");
+                            textUse = "Bravo !! Vous avez trouvé la bonne réponse ! Vous pouvez passer au quiz 3 dès aprésent !";
+                            var res = CustomDialogForm.Show(textUse, langue);
                             question2 = true;
                             label1.Text = "Commencer Quiz 3";
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var res = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var res = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -492,26 +1259,30 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Cuestionario 2:");
-                        DialogResult Hawaï = MessageBox.Show("¿A qué país pertenece Hawai? \n\n O = Estados Unidos \n N = América del Sur \n A = Asia ", "QUIZ  --  ¡EL HECHICERO LOCO!", MessageBoxButtons.YesNoCancel);
-                        if (Hawaï == DialogResult.Yes)
+                        textUse = "Cuestionario 2:";
+                        var res = CustomDialogForm.Show(textUse, langue);
+                        textUse = "¿A qué país pertenece Hawai? \n\n Y = Estados Unidos \n N = América del Sur \n C = Asia \n QUIZ  --  ¡EL HECHICERO LOCO!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 3.");
+                            textUse = "¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 3.";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             question2 = true;
                             label1.Text = "Comenzar Cuestionario 3";
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
@@ -522,8 +1293,9 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "en")
                     {
                         MessageBox.Show("Quiz 2:");
-                        DialogResult Hawaï = MessageBox.Show("Which country does Hawaii belong to? \n\n O = United States \n N = Amérique du sud \n A = Asia ", "QUIZ  --  THE MAD WIZZARD!", MessageBoxButtons.YesNoCancel);
-                        if (Hawaï == DialogResult.Yes)
+                        textUse = "Which country does Hawaii belong to? \n\n Y = United States \n N = Amérique du sud \n C = Asia \n QUIZ  --  THE MAD WIZZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -533,14 +1305,14 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("False!!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("False!!");
                             Application.Exit();
@@ -551,8 +1323,9 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "ar")
                     {
                         MessageBox.Show(": السؤال 2");
-                        DialogResult Hawaï = MessageBox.Show("إلى أي دولة تنتمي هاواي؟ \n\n O = الولايات المتحدة الأمريكية \n N = أمريكا الجنوبية \n A = آسيا ", "مسابقة - الساحر المجنون ", MessageBoxButtons.YesNoCancel);
-                        if (Hawaï == DialogResult.Yes)
+                        textUse = "إلى أي دولة تنتمي هاواي؟ \n\n Y = الولايات المتحدة الأمريكية \n N = أمريكا الجنوبية \n C = آسيا \n مسابقة --- الساحر المجنون ";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -562,14 +1335,14 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Hawaï == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
@@ -583,22 +1356,23 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr"){
                         MessageBox.Show("Quiz 3 :");
-                        DialogResult Mercure = MessageBox.Show(" Quelle est la planète la plus proche du soleil ? \n\n O = Mars \n N = Terre \n A = Mercure ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (Mercure == DialogResult.Yes)
+                        textUse = "Quelle est la planète la plus proche du soleil ? \n\n Y = Mars \n N = Terre \n C = Mercure \nQUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Mercure == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("FAUX !!");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Mercure == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -612,22 +1386,23 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "en")
                     {
                         MessageBox.Show("Quiz 3:");
-                        DialogResult Mercure = MessageBox.Show(" Which planet is closest to the sun? \n\n O = March \n N = Earth \n A = Mercure ", "QUIZ  --  THE MAD WIZZARD!", MessageBoxButtons.YesNoCancel);
-                        if (Mercure == DialogResult.Yes)
+                        textUse = "Which planet is closest to the sun? \n\n Y = March \n N = Earth \n C = Mercure \nQUIZ  --  THE MAD WIZZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("False!!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Mercure == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("False!!");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Mercure == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -641,22 +1416,23 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "es")
                     {
                         MessageBox.Show("Quiz 3 :");
-                        DialogResult Mercure = MessageBox.Show(" ¿Qué planeta está más cerca del Sol? \n\n O = Marzo \n N = Tierra \n A = Mercure ", "QUIZ -- ¡EL MAGO LOCO!", MessageBoxButtons.YesNoCancel);
-                        if (Mercure == DialogResult.Yes)
+                        textUse = "¿Qué planeta está más cerca del Sol? \n\n Y = Marzo \n N = Tierra \n C = Mercure \nQUIZ -- ¡EL MAGO LOCO!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Mercure == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("¡FALSO!");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Mercure == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -670,22 +1446,23 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "ar")
                     {
                         MessageBox.Show(":الاختبار 3");
-                        DialogResult Mercure = MessageBox.Show(" ما الكوكب الأقرب إلى الشمس؟ \n\n O = مارس \n N = الأرض \n A = ميركيور ", "مسابقة - الساحر المجنون", MessageBoxButtons.YesNoCancel);
-                        if (Mercure == DialogResult.Yes)
+                        textUse = "ما الكوكب الأقرب إلى الشمس؟ \n\n Y = مارس \n N = الأرض \n C = ميركيور \nمسابقة - الساحر المجنون";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Mercure == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("خطأ");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Mercure == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -700,17 +1477,19 @@ namespace Try_To_ESCAPE__GAME
                 if (question3 == true && question4 == false) // si la question 3 à été répondu et que la question 4 n'a pas encore été répondue
                 {
                     stopRun();
-                    if (langue == "fr"){
+                    if (langue == "fr")
+                    {
+                        textUse = "Où se trouve l’hypothalamus dans le corps humain? \n\n Y = Dans les yeux \n N = Dans le cerveau \n C = Dabs l'estomac \nQUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
                         MessageBox.Show("Quiz 4 :");
-                        DialogResult lhypothalamus = MessageBox.Show(" Où se trouve l’hypothalamus dans le corps humain? \n\n O = Dans les yeux \n N = Dans le cerveau \n A = Dabs l'estomac ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (lhypothalamus == DialogResult.Yes)
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -720,7 +1499,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
@@ -731,15 +1510,16 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "en")
                     {
                         MessageBox.Show("Quiz 4:");
-                        DialogResult lhypothalamus = MessageBox.Show(" Where is the hypothalamus located in the human body? \n\n O = In the eyes \n N = In the brain \n A = In the stomach ", "QUIZ  --  THE MAD WIZZARD!", MessageBoxButtons.YesNoCancel);
-                        if (lhypothalamus == DialogResult.Yes)
+                        textUse = "Where is the hypothalamus located in the human body? \n\n Y = In the eyes \n N = In the brain \n A = In the stomach \nQUIZ  --  THE MAD WIZZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("False!!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -749,7 +1529,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("False!!");
                             Application.Exit();
@@ -760,15 +1540,16 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "es")
                     {
                         MessageBox.Show("Cuestionario 4:");
-                        DialogResult lhypothalamus = MessageBox.Show(" ¿Dónde se encuentra el hipotálamo en el cuerpo humano? \n\n O = En los ojos \n N = En el cerebro \n A = En el estómago ", "QUIZ -- ¡EL MAGO LOCO!", MessageBoxButtons.YesNoCancel);
-                        if (lhypothalamus == DialogResult.Yes)
+                        textUse = "¿Dónde se encuentra el hipotálamo en el cuerpo humano? \n\n Y = En los ojos \n N = En el cerebro \n C = En el estómago \nQUIZ -- ¡EL MAGO LOCO!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -778,7 +1559,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
@@ -789,15 +1570,16 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "ar")
                     {
                         MessageBox.Show(":الاختبار 4");
-                        DialogResult lhypothalamus = MessageBox.Show(" أين يقع الوطاء في جسم الإنسان؟ \n\n O = في العيون \n N = في الدماغ \n A = في المعدة ", "مسابقة - الساحر المجنون", MessageBoxButtons.YesNoCancel);
-                        if (lhypothalamus == DialogResult.Yes)
+                        textUse = "أين يقع الوطاء في جسم الإنسان؟ \n\n Y = في العيون \n N = في الدماغ \n C = في المعدة \nمسابقة - الساحر المجنون";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -807,7 +1589,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (lhypothalamus == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
@@ -821,15 +1603,16 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr"){
                         MessageBox.Show("Quiz 5 :");
-                        DialogResult Suisse = MessageBox.Show("Quel est le plus grand lac entièrement en Suisse ? \n\n O = Lac de Zurich \n N =  Lac de Neuchâtel\n A = Lac Léman ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (Suisse == DialogResult.Yes)
+                        textUse = "Quel est le plus grand lac entièrement en Suisse ? \n\n Y = Lac de Zurich \n N =  Lac de Neuchâtel\n C = Lac Léman \nQUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -839,7 +1622,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
@@ -850,15 +1633,16 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "es")
                     {
                         MessageBox.Show("Cuestionario 5 :");
-                        DialogResult Suisse = MessageBox.Show("¿Cuál es el lago más grande de Suiza? \n\n O = Lago de Zúrich \n N =  Lago de Neuchâtel\n A = Lago Lemán ", "QUIZ -- ¡EL MAGO LOCO!", MessageBoxButtons.YesNoCancel);
-                        if (Suisse == DialogResult.Yes)
+                        textUse = "¿Cuál es el lago más grande de Suiza? \n\n Y = Lago de Zúrich \n N =  Lago de Neuchâtel\n C = Lago Lemán \nQUIZ -- ¡EL MAGO LOCO!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -868,7 +1652,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
@@ -879,15 +1663,16 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "en")
                     {
                         MessageBox.Show("Quiz 5:");
-                        DialogResult Suisse = MessageBox.Show("Which is the largest lake entirely in Switzerland? \n\n O = Lake Zurich \n N =  Lake Neuchâtel\n A = Lake Leman  ", "QUIZ  --  THE MAD WIZZARD!", MessageBoxButtons.YesNoCancel);
-                        if (Suisse == DialogResult.Yes)
+                        textUse = "Which is the largest lake entirely in Switzerland? \n\n Y = Lake Zurich \n N =  Lake Neuchâtel\n C = Lake Leman \nQUIZ  --  THE MAD WIZZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("False!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -897,7 +1682,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("False!");
                             Application.Exit();
@@ -908,15 +1693,16 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "ar")
                     {
                         MessageBox.Show(":الاختبار 5");
-                        DialogResult Suisse = MessageBox.Show("ما هي أكبر بحيرة في سويسرا؟ \n\n O = بحيرة زيورخ \n N =  بحيرة نوشاتيل\n A = بحيرة جنيف ", "مسابقة - الساحر المجنون", MessageBoxButtons.YesNoCancel);
-                        if (Suisse == DialogResult.Yes)
+                        textUse = "ما هي أكبر بحيرة في سويسرا؟ \n\n Y = بحيرة زيورخ \n N =  بحيرة نوشاتيل\n C = بحيرة جنيف \nمسابقة - الساحر المجنون";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -926,7 +1712,7 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Suisse == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
@@ -940,8 +1726,9 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr"){
                         MessageBox.Show("Quiz 6 :");
-                        DialogResult Paris = MessageBox.Show("Dans quelle ville se déroule l’action principale de Les Trois Mousquetaires ? \n\n O = Paris \n N =  Londres\n A = Bordeaux ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (Paris == DialogResult.Yes)
+                        textUse = "Dans quelle ville se déroule l’action principale de Les Trois Mousquetaires ? \n\n Y = Paris \n N =  Londres\n C = Bordeaux \nQUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -951,14 +1738,14 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
@@ -969,8 +1756,9 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "es")
                     {
                         MessageBox.Show("Cuestionario 6 :");
-                        DialogResult Paris = MessageBox.Show("¿En qué ciudad transcurre la acción principal de Los tres mosqueteros? \n\n O = París \n N =  Londres\n A = Burdeos ", "QUIZ -- ¡EL MAGO LOCO!", MessageBoxButtons.YesNoCancel);
-                        if (Paris == DialogResult.Yes)
+                        textUse = "¿En qué ciudad transcurre la acción principal de Los tres mosqueteros? \n\n Y = París \n N =  Londres\n C = Burdeos \nQUIZ -- ¡EL MAGO LOCO!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -980,14 +1768,14 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
@@ -998,8 +1786,9 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "en")
                     {
                         MessageBox.Show("Quiz 6 :");
-                        DialogResult Paris = MessageBox.Show("In which city does the main action of The Three Musketeers take place? \n\n O = Paris \n N =  London\n A = Bordeaux ", "QUIZ -- THE MAD WIZARD!", MessageBoxButtons.YesNoCancel);
-                        if (Paris == DialogResult.Yes)
+                        textUse = "In which city does the main action of The Three Musketeers take place? \n\n Y = Paris \n N =  London\n C = Bordeaux \nQUIZ -- THE MAD WIZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -1009,14 +1798,14 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("FALSE!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("FALSE!");
                             Application.Exit();
@@ -1027,8 +1816,9 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "ar")
                     {
                         MessageBox.Show("الاختبار 6 :");
-                        DialogResult Paris = MessageBox.Show("في أي مدينة تدور الأحداث الرئيسية لفيلم الفرسان الثلاثة؟ \n\n O = باريس \n N =  لندن\n A = بوردو ", "مسابقة - الساحر المجنون", MessageBoxButtons.YesNoCancel);
-                        if (Paris == DialogResult.Yes)
+                        textUse = "في أي مدينة تدور الأحداث الرئيسية لفيلم الفرسان الثلاثة؟ \n\n Y = باريس \n N =  لندن\n C = بوردو \nمسابقة - الساحر المجنون";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -1038,14 +1828,14 @@ namespace Try_To_ESCAPE__GAME
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Paris == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
@@ -1059,22 +1849,23 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr"){
                         MessageBox.Show("Quiz 7 :");
-                        DialogResult Palme24 = MessageBox.Show("Quel film a remporté la Palme d’Or au Festival de Cannes 2024 ? \n\n O = The Substance de Coralie Fargeat \n N = La Plus Précieuse des marchandises de Michel Hazanavicius\n A = Anora de Sean Baker ", "QUIZ  --  LE SORCIER FOU !", MessageBoxButtons.YesNoCancel);
-                        if (Palme24 == DialogResult.Yes)
+                        textUse = "Quel film a remporté la Palme d’Or au Festival de Cannes 2024 ? \n\n Y = The Substance de Coralie Fargeat \n N = La Plus Précieuse des marchandises de Michel Hazanavicius\n C = Anora de Sean Baker \nQUIZ  --  LE SORCIER FOU !";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("FAUX !!");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Palme24 == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("FAUX !!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Palme24 == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -1088,22 +1879,23 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "es")
                     {
                         MessageBox.Show("Cuestionario 7 :");
-                        DialogResult Palme24 = MessageBox.Show("¿Qué película ganó la Palma de Oro en el Festival de Cannes 2024? \n\n O = La sustancia de Coralie Fargeat \n N = La mercancía más preciada de Michel Hazanavicius\n A = Anora de Sean Baker ", "QUIZ -- ¡EL MAGO LOCO!", MessageBoxButtons.YesNoCancel);
-                        if (Palme24 == DialogResult.Yes)
+                        textUse = "¿Qué película ganó la Palma de Oro en el Festival de Cannes 2024? \n\n Y = La sustancia de Coralie Fargeat \n N = La mercancía más preciada de Michel Hazanavicius\n C = Anora de Sean Baker \nQUIZ -- ¡EL MAGO LOCO!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("¡FALSO!");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Palme24 == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("¡FALSO!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Palme24 == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -1117,22 +1909,23 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "en")
                     {
                         MessageBox.Show("Quiz 7:");
-                        DialogResult Palme24 = MessageBox.Show("Which film won the Palme d'Or at Cannes 2024? \n\n O = The Substance by Coralie Fargeat \n N = The Most Precious Commodity by Michel Hazanavicius\n A = Anora by Sean Baker ", "QUIZ  --  THE MAD WIZZARD!", MessageBoxButtons.YesNoCancel);
-                        if (Palme24 == DialogResult.Yes)
+                        textUse = "Which film won the Palme d'Or at Cannes 2024? \n\n Y = The Substance by Coralie Fargeat \n N = The Most Precious Commodity by Michel Hazanavicius\n C = Anora by Sean Baker \nQUIZ  --  THE MAD WIZZARD!";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("False!!");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Palme24 == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("False!!");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Palme24 == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -1146,22 +1939,23 @@ namespace Try_To_ESCAPE__GAME
                     if (langue == "ar")
                     {
                         MessageBox.Show(":الاختبار 7 ");
-                        DialogResult Palme24 = MessageBox.Show("أي فيلم فاز بالسعفة الذهبية في مهرجان كان 2024؟ \n\n O = المادة بقلم كورالي فارجيت \n N = أثمن سلعة ثمينة لميشيل هازانافيتشيوس\n A = أنورا من شون بيكر ", "مسابقة - الساحر المجنون", MessageBoxButtons.YesNoCancel);
-                        if (Palme24 == DialogResult.Yes)
+                        textUse = "أي فيلم فاز بالسعفة الذهبية في مهرجان كان 2024؟ \n\n Y = المادة بقلم كورالي فارجيت \n N = أثمن سلعة ثمينة لميشيل هازانافيتشيوس\n C = أنورا من شون بيكر \nمسابقة - الساحر المجنون";
+                        var result = CustomDialogForm2.Show(textUse, langue);
+                        if (result == DialogResult.Yes)
                         {
                             MessageBox.Show("خطأ");
                             canRun();
                             Application.Exit();
                             return;
                         }
-                        if (Palme24 == DialogResult.No)
+                        if (result == DialogResult.No)
                         {
                             MessageBox.Show("خطأ");
                             Application.Exit();
                             canRun();
                             return;
                         }
-                        if (Palme24 == DialogResult.Cancel)
+                        if (result == DialogResult.Cancel)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
@@ -1258,52 +2052,59 @@ namespace Try_To_ESCAPE__GAME
 
         }
 
-        private void button13_Click(object sender, EventArgs e) // si on clique sur le bouton de chois de langues
+        private void button13_Click(object sender, EventArgs e) // si on clique sur le bouton de changement de langue
         {
             this.ActiveControl = null; // Désélectionne le bouton
 
             if (langue == "fr")
             {
-                DialogResult Language = MessageBox.Show("Choisissez votre langue. \n O = Français \n N = English \n A = + de langues", "Langue", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "Choisissez votre langue. \n Y = Français \n N = English \n C = + de langues";
+                var r = CustomDialogForm2.Show(textUse, langue);
+                if (r == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu est déjà en Français.");
+                    textUse = "Votre jeu est déjà en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     langue = "fr";
                     button13.Text = "Langue : Français";
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (r == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     langue = "en";
                     button13.Text = "Language : English";
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (r == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("Choisissez votre langue. \n O = العربية \n N = Español \n A = Annuler", "Langue", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "Choisissez votre langue. \n Y = العربية \n N = Español \n C = Annuler";
+                    var res = CustomDialogForm2.Show(textUse, langue);
+                    if (res == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (res == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (res == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Votre jeu est resté en Français.");
                         langue = "fr";
+                        textUse = "Votre jeu est resté en Français.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         fr();
                         return;
                     }
@@ -1311,46 +2112,53 @@ namespace Try_To_ESCAPE__GAME
             }
             if (langue == "en")
             {
-                DialogResult Language = MessageBox.Show("Choose your language. \n O = Français \n N = English \n A = more languages", "Language", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "Choose your language. \n Y = Français \n N = English \n C = more languages";
+                var res = CustomDialogForm2.Show(textUse, langue);
+                if (res == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     button13.Text = "Langue : Français";
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (res == DialogResult.No)
                 {
-                    MessageBox.Show("Your game is already in English.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game is already in English.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (res == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("Choose your language. \n O = العربية \n N = Español \n A = Cancel", "Language", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "Choose your language. \n Y = العربية \n N = Español \n C = Cancel";
+                    var esr = CustomDialogForm2.Show(textUse, langue);
+                    if (esr == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (esr == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (esr == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Your game has remained in English.");
                         langue = "en";
+                        textUse = "Your game has remained in English.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         en();
                         return;
                     }
@@ -1358,91 +2166,105 @@ namespace Try_To_ESCAPE__GAME
             }
             if (langue == "ar")
             {
-                DialogResult Language = MessageBox.Show("اختر لغتك. \n O = Français \n N = English \n A = المزيد من اللغات", "لُغَةٌ", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "اختر لغتك. \n Y = Français \n N = English \n C = المزيد من اللغات";
+                var esr = CustomDialogForm2.Show(textUse, langue);
+                if (esr == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     button13.Text = "Langue : Français";
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (esr == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (esr == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("اختر لغتك. \n O = العربية \n N = Español \n A = إلغاء الأمر ", "لُغَةٌ", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "اختر لغتك. \n Y = العربية \n N = Español \n C = إلغاء الأمر ";
+                    var res = CustomDialogForm2.Show(textUse, langue);
+                    if (res == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لعبتك باللغة العربية بالفعل");
+                        textUse = "لعبتك باللغة العربية بالفعل";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (res == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (res == DialogResult.Cancel)
                     {
-                        MessageBox.Show("بقيت لعبتك باللغة العربية");
-                        langue = "ar";
                         ar();
+                        langue = "ar";
+                        textUse = "بقيت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         return;
                     }
                 }
             }
             if (langue == "es")
             {
-                DialogResult Language = MessageBox.Show("Elige tu idioma. \n O = Français \n N = English \n A = Más Idioma", "lengua", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "Elige tu idioma. \n Y = Français \n N = English \n C = Más Idioma";
+                var res = CustomDialogForm2.Show(textUse, langue);
+                if (res == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     button13.Text = "Langue : Français";
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (res == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (res == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("Elige tu idioma. \n O = العربية \n N = Español \n A = Cancelar", "lengua", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "Elige tu idioma. \n Y = العربية \n N = Español \n C = Cancelar";
+                    var ress = CustomDialogForm2.Show(textUse, langue);
+                    if (ress == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (ress == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ya está en español.");
+                        textUse = "Tu juego ya está en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (ress == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Tu juego ha permanecido en español.");
                         langue = "es";
+                        textUse = "Tu juego ha permanecido en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         es();
                         return;
                     }
@@ -1565,52 +2387,56 @@ namespace Try_To_ESCAPE__GAME
             langue = "ar";
         }
 
-        private void button14_Click(object sender, EventArgs e) // si on clique sur le bouton restart (pour relancer le jeu)
+        private void button14_Click(object sender, EventArgs e)// si on clique sur le de réinitialisation
         {
             if (langue == "fr")
             {
-                DialogResult rn = MessageBox.Show("Voulez vous vraiment TOUT recommencer ?", "Réinitialiser", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "Voulez vous vraiment TOUT recommencer ?";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart(); // relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
             }
             if (langue == "en")
             {
-                DialogResult rn = MessageBox.Show("Do you really want to start ALL over again?", "Restart", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "Do you really want to start ALL over again?";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart();// relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
             }
             if (langue == "es")
             {
-                DialogResult rn = MessageBox.Show("¿De verdad quieres empezar TODO de nuevo?", "Restablecimiento", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "¿De verdad quieres empezar TODO de nuevo?";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart();// relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
             }
             if (langue == "ar")
             {
-                DialogResult rn = MessageBox.Show("هل تريد حقا أن تبدأ من جديد؟", "اعاده تعيين", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "هل تريد حقا أن تبدأ من جديد؟";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart();// relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
@@ -1648,36 +2474,25 @@ namespace Try_To_ESCAPE__GAME
         {
             if (langue == "fr")
             {
-                DialogResult crédits = MessageBox.Show("Réalisateur du jeu : Hugo Schweizer \nGame Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoix : Chadi Toundi \nTête : Chadi Toundi \nTraduction en Arabe : Chadi Toundi ", "Crédits", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Réalisateur du jeu : Hugo Schweizer \nGame Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nVoix : Chadi Toundi \nTête : Chadi Toundi \nTraduction en Arabe : Chadi Toundi\nContributions créatives : Chadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "en")
             {
-                DialogResult crédits = MessageBox.Show("Game Director : Hugo Schweizer \nLead Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoice : Chadi Toundi \nHead : Chadi Toundi \nArabic Traduction : Chadi Toundi ", "Credits", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Game Director : Hugo Schweizer \nLead Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nVoice : Chadi Toundi \nHead : Chadi Toundi \nArabic Traduction : Chadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "es")
             {
-                DialogResult crédits = MessageBox.Show("Director de Juego : Hugo Schweizer \nDiseñador de juegos : Hugo Schweizer \nDiseñador de niveles : Hugo Schweizer \nProgramación de juegos : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoz : Chadi Toundi \nCabeza : Chadi Toundi \nTraducción al árabe : Chadi Toundi ", "Crédits", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Director de Juego : Hugo Schweizer \nDiseñador de juegos : Hugo Schweizer \nDiseñador de niveles : Hugo Schweizer \nProgramación de juegos : Hugo Schweizer \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nVoz : Chadi Toundi \nCabeza : Chadi Toundi \nTraducción al árabe : Chadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "ar")
             {
-                DialogResult crédits = MessageBox.Show("Hugo Schweizer : مدير اللعبة  \nHugo Schweizer : مصمم الألعاب \nHugo Schweizer : مصمم المستوى \nHugo Schweizer : برمجة اللعب  \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nChadi Toundi : صوت \nChadi Toundi : رأس \nChadi Toundi : الترجمة العربيةChadi Toundi ", "الائتمانات", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Hugo Schweizer : مدير اللعبة  \nHugo Schweizer : مصمم الألعاب \nHugo Schweizer : مصمم المستوى \nHugo Schweizer : برمجة اللعب  \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nChadi Toundi : صوت \nChadi Toundi : رأس \nChadi Toundi : الترجمة العربيةChadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
+
         }
 
         private void canRun() // Redonne la possibilité de marcher au joueur
