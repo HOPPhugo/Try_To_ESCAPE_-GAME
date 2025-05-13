@@ -1284,7 +1284,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1292,14 +1293,16 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Quiz 2:");
+                        textUse = "Quiz 2:";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "Which country does Hawaii belong to? \n\n Y = United States \n N = Amérique du sud \n C = Asia \n QUIZ  --  THE MAD WIZZARD!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Well done! You've found the right answer! You can now go on to quiz 3!");
+                            textUse = "Well done! You've found the right answer! You can now go on to quiz 3!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             question2 = true;
                             label1.Text = "Start Quiz 3";
                             canRun();
@@ -1307,14 +1310,16 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1322,14 +1327,16 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show(": السؤال 2");
+                        textUse = ": السؤال 2";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "إلى أي دولة تنتمي هاواي؟ \n\n Y = الولايات المتحدة الأمريكية \n N = أمريكا الجنوبية \n C = آسيا \n مسابقة --- الساحر المجنون ";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 3 ");
+                            textUse = "أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 3 ";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             question2 = true;
                             label1.Text = "بدء الاختبار 3";
                             canRun();
@@ -1337,14 +1344,16 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ ";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ ";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1355,19 +1364,22 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr"){
-                        MessageBox.Show("Quiz 3 :");
+                        textUse = "Quiz 3 : ";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "Quelle est la planète la plus proche du soleil ? \n\n Y = Mars \n N = Terre \n C = Mercure \nQUIZ  --  LE SORCIER FOU !";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var s = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var s = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
@@ -1376,7 +1388,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 4 dès aprésent !");
+                            textUse = "ravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 4 dès aprésent !";
+                            var s = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 4";
                             question3 = true;
                             canRun();
@@ -1385,19 +1398,22 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Quiz 3:");
+                        textUse = "Quiz 3:";
+                        var s = CustomDialogForm.Show(textUse, langue);
                         textUse = "Which planet is closest to the sun? \n\n Y = March \n N = Earth \n C = Mercure \nQUIZ  --  THE MAD WIZZARD!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
@@ -1406,7 +1422,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Congratulations! You've found the right answer! You can now move on to quiz 4!");
+                            textUse = "Congratulations! You've found the right answer! You can now move on to quiz 4!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 4";
                             question3 = true;
                             canRun();
@@ -1415,19 +1432,22 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Quiz 3 :");
+                        textUse = "Quiz 3 :";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "¿Qué planeta está más cerca del Sol? \n\n Y = Marzo \n N = Tierra \n C = Mercure \nQUIZ -- ¡EL MAGO LOCO!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
@@ -1436,7 +1456,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 4.");
+                            textUse = "¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 4.";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Iniciar Cuestionario 4";
                             question3 = true;
                             canRun();
@@ -1445,19 +1466,22 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show(":الاختبار 3");
+                        textUse = ":الاختبار 3";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "ما الكوكب الأقرب إلى الشمس؟ \n\n Y = مارس \n N = الأرض \n C = ميركيور \nمسابقة - الساحر المجنون";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
@@ -1466,7 +1490,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 4");
+                            textUse = "أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 4";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "بدء الاختبار 4";
                             question3 = true;
                             canRun();
@@ -1479,12 +1504,14 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr")
                     {
+                        textUse = "Quiz 4 :";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "Où se trouve l’hypothalamus dans le corps humain? \n\n Y = Dans les yeux \n N = Dans le cerveau \n C = Dabs l'estomac \nQUIZ  --  LE SORCIER FOU !";
                         var result = CustomDialogForm2.Show(textUse, langue);
-                        MessageBox.Show("Quiz 4 :");
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1493,7 +1520,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 5 dès aprésent !");
+                            textUse = "Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 5 dès aprésent !";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 5";
                             question4 = true;
                             canRun();
@@ -1501,7 +1529,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1509,12 +1538,14 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Quiz 4:");
+                        textUse = "Quiz 4:";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "Where is the hypothalamus located in the human body? \n\n Y = In the eyes \n N = In the brain \n A = In the stomach \nQUIZ  --  THE MAD WIZZARD!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1523,7 +1554,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Congratulations! You've found the right answer! You can now move on to quiz 5!");
+                            textUse = "Congratulations! You've found the right answer! You can now move on to quiz 5!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 5";
                             question4 = true;
                             canRun();
@@ -1531,7 +1563,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1539,12 +1572,14 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Cuestionario 4:");
+                        textUse = "Cuestionario 4:";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "¿Dónde se encuentra el hipotálamo en el cuerpo humano? \n\n Y = En los ojos \n N = En el cerebro \n C = En el estómago \nQUIZ -- ¡EL MAGO LOCO!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1553,7 +1588,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 5.");
+                            textUse = "¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 5.";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Iniciar Cuestionario 5";
                             question4 = true;
                             canRun();
@@ -1561,7 +1597,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1569,12 +1606,14 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show(":الاختبار 4");
+                        textUse = ":الاختبار 4";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "أين يقع الوطاء في جسم الإنسان؟ \n\n Y = في العيون \n N = في الدماغ \n C = في المعدة \nمسابقة - الساحر المجنون";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1583,7 +1622,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 5");
+                            textUse = "أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 5";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "ابدأ الاختبار 5";
                             question4 = true;
                             canRun();
@@ -1591,7 +1631,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1602,12 +1643,14 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr"){
-                        MessageBox.Show("Quiz 5 :");
+                        textUse = "Quiz 5 :";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "Quel est le plus grand lac entièrement en Suisse ? \n\n Y = Lac de Zurich \n N =  Lac de Neuchâtel\n C = Lac Léman \nQUIZ  --  LE SORCIER FOU !";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1616,7 +1659,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 6 dès aprésent !");
+                            textUse = "Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 6 dès aprésent !";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 6";
                             question5 = true;
                             canRun();
@@ -1624,7 +1668,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1632,12 +1677,14 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Cuestionario 5 :");
+                        textUse = "Cuestionario 5 :";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "¿Cuál es el lago más grande de Suiza? \n\n Y = Lago de Zúrich \n N =  Lago de Neuchâtel\n C = Lago Lemán \nQUIZ -- ¡EL MAGO LOCO!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1646,7 +1693,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 6.");
+                            textUse = "¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 6.";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Iniciar Cuestionario 6";
                             question5 = true;
                             canRun();
@@ -1654,7 +1702,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1662,12 +1711,14 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Quiz 5:");
+                        textUse = "Quiz 5:";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "Which is the largest lake entirely in Switzerland? \n\n Y = Lake Zurich \n N =  Lake Neuchâtel\n C = Lake Leman \nQUIZ  --  THE MAD WIZZARD!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("False!");
+                            textUse = "False!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1676,7 +1727,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Congratulations! You've found the right answer! You can now move on to quiz 6!");
+                            textUse = "Congratulations! You've found the right answer! You can now move on to quiz 6!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 6";
                             question5 = true;
                             canRun();
@@ -1684,7 +1736,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("False!");
+                            textUse = "False!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1692,12 +1745,14 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show(":الاختبار 5");
+                        textUse = ":الاختبار 5";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "ما هي أكبر بحيرة في سويسرا؟ \n\n Y = بحيرة زيورخ \n N =  بحيرة نوشاتيل\n C = بحيرة جنيف \nمسابقة - الساحر المجنون";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1706,7 +1761,8 @@ namespace Try_To_ESCAPE__GAME
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 6");
+                            textUse = "أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 6";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "بدء الاختبار 6";
                             question5 = true;
                             canRun();
@@ -1714,7 +1770,8 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1725,14 +1782,16 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr"){
-                        MessageBox.Show("Quiz 6 :");
+                        textUse = "Quiz 6 :";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "Dans quelle ville se déroule l’action principale de Les Trois Mousquetaires ? \n\n Y = Paris \n N =  Londres\n C = Bordeaux \nQUIZ  --  LE SORCIER FOU !";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 7 dès aprésent !");
+                            textUse = "Bravo !! Vous avez trouver la bonne réponse ! Vous pouvez passer au quiz 7 dès aprésent !";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 7";
                             question6 = true;
                             canRun();
@@ -1740,14 +1799,16 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1755,14 +1816,16 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Cuestionario 6 :");
+                        textUse = "Cuestionario 6 :";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "¿En qué ciudad transcurre la acción principal de Los tres mosqueteros? \n\n Y = París \n N =  Londres\n C = Burdeos \nQUIZ -- ¡EL MAGO LOCO!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 7.");
+                            textUse = "¡Bien hecho! Has encontrado la respuesta correcta. Ahora puedes pasar a la prueba 7.";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Iniciar Cuestionario 7";
                             question6 = true;
                             canRun();
@@ -1770,14 +1833,16 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1785,14 +1850,16 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Quiz 6 :");
+                        textUse = "Quiz 6 :";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "In which city does the main action of The Three Musketeers take place? \n\n Y = Paris \n N =  London\n C = Bordeaux \nQUIZ -- THE MAD WIZARD!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("Congratulations! You've found the right answer! You can now move on to quiz 7!");
+                            textUse = "Congratulations! You've found the right answer! You can now move on to quiz 7!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Start Quiz 7";
                             question6 = true;
                             canRun();
@@ -1800,14 +1867,16 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("FALSE!");
+                            textUse = "FALSE!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("FALSE!");
+                            textUse = "FALSE!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1815,14 +1884,16 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show("الاختبار 6 :");
+                        textUse = "الاختبار 6 :";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "في أي مدينة تدور الأحداث الرئيسية لفيلم الفرسان الثلاثة؟ \n\n Y = باريس \n N =  لندن\n C = بوردو \nمسابقة - الساحر المجنون";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
-                            MessageBox.Show("أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 7");
+                            textUse = "أحسنت! لقد وجدت الإجابة الصحيحة! يمكنك الآن الانتقال إلى الاختبار 7";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "بدء الاختبار 7";
                             question6 = true;
                             canRun();
@@ -1830,14 +1901,16 @@ namespace Try_To_ESCAPE__GAME
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
                         }
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1848,19 +1921,22 @@ namespace Try_To_ESCAPE__GAME
                 {
                     stopRun();
                     if (langue == "fr"){
-                        MessageBox.Show("Quiz 7 :");
+                        textUse = "Quiz 7 :";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "Quel film a remporté la Palme d’Or au Festival de Cannes 2024 ? \n\n Y = The Substance de Coralie Fargeat \n N = La Plus Précieuse des marchandises de Michel Hazanavicius\n C = Anora de Sean Baker \nQUIZ  --  LE SORCIER FOU !";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("FAUX !!");
+                            textUse = "FAUX !!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1870,7 +1946,8 @@ namespace Try_To_ESCAPE__GAME
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
                             question7 = true;
-                            MessageBox.Show("Bravo !! Vous avez trouver la bonne réponse !C'était le dernier quiz ! Vous pouvez changer de salle");
+                            textUse = "Bravo !! Vous avez trouver la bonne réponse !C'était le dernier quiz ! Vous pouvez changer de salle";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Plus de QUIZ";
                             canRun();
                             return;
@@ -1878,19 +1955,22 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("Cuestionario 7 :");
+                        textUse = "Cuestionario 7 :";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "¿Qué película ganó la Palma de Oro en el Festival de Cannes 2024? \n\n Y = La sustancia de Coralie Fargeat \n N = La mercancía más preciada de Michel Hazanavicius\n C = Anora de Sean Baker \nQUIZ -- ¡EL MAGO LOCO!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("¡FALSO!");
+                            textUse = "¡FALSO!";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1900,7 +1980,8 @@ namespace Try_To_ESCAPE__GAME
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
                             question7 = true;
-                            MessageBox.Show("¡Bien hecho! ¡Has encontrado la respuesta correcta! ¡Esa era la última prueba! Puedes cambiar de habitación");
+                            textUse = "¡Bien hecho! ¡Has encontrado la respuesta correcta! ¡Esa era la última prueba! Puedes cambiar de habitación";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "Más QUIZ";
                             canRun();
                             return;
@@ -1908,19 +1989,22 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("Quiz 7:");
+                        textUse = "Quiz 7:";
+                        var w = CustomDialogForm.Show(textUse, langue);
                         textUse = "Which film won the Palme d'Or at Cannes 2024? \n\n Y = The Substance by Coralie Fargeat \n N = The Most Precious Commodity by Michel Hazanavicius\n C = Anora by Sean Baker \nQUIZ  --  THE MAD WIZZARD!";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("False!!");
+                            textUse = "False!!";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1930,7 +2014,8 @@ namespace Try_To_ESCAPE__GAME
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
                             question7 = true;
-                            MessageBox.Show("Congratulations! You've found the right answer! That was the last quiz! You can change room");
+                            textUse = "Congratulations! You've found the right answer! That was the last quiz! You can change room";
+                            var a = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "No more quizzes";
                             canRun();
                             return;
@@ -1938,19 +2023,22 @@ namespace Try_To_ESCAPE__GAME
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show(":الاختبار 7 ");
+                        textUse = ":الاختبار 7";
+                        var a = CustomDialogForm.Show(textUse, langue);
                         textUse = "أي فيلم فاز بالسعفة الذهبية في مهرجان كان 2024؟ \n\n Y = المادة بقلم كورالي فارجيت \n N = أثمن سلعة ثمينة لميشيل هازانافيتشيوس\n C = أنورا من شون بيكر \nمسابقة - الساحر المجنون";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             canRun();
                             Application.Exit();
                             return;
                         }
                         if (result == DialogResult.No)
                         {
-                            MessageBox.Show("خطأ");
+                            textUse = "خطأ";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             Application.Exit();
                             canRun();
                             return;
@@ -1960,7 +2048,8 @@ namespace Try_To_ESCAPE__GAME
                             SoundPlayer acclamer = new SoundPlayer(Properties.Resources.Acclmation);
                             acclamer.Play();
                             question7 = true;
-                            MessageBox.Show("أحسنت! لقد وجدت الإجابة الصحيحة! كان هذا آخر اختبار! يمكنك تغيير الغرف");
+                            textUse = "أحسنت! لقد وجدت الإجابة الصحيحة! كان هذا آخر اختبار! يمكنك تغيير الغرف";
+                            var w = CustomDialogForm.Show(textUse, langue);
                             label1.Text = "المزيد من الاختبارات";
                             canRun();
                             return;
@@ -1970,20 +2059,25 @@ namespace Try_To_ESCAPE__GAME
                 if (question7 == true ) // si la question 7 à été répondu
                 {
                     stopRun(); 
-                    if (langue == "fr"){
-                        MessageBox.Show("Il n'y a plus de quiz. Vous avez tout déchirer ! \n Mais si vous souhaîter encore avoir des questions, vous pouvez très bien relancer le jeu, même si ce sera les mêmes...");
+                    if (langue == "fr")
+                    {
+                        textUse = "Il n'y a plus de quiz. Vous avez tout déchirer ! \n Mais si vous souhaîter encore avoir des questions, vous pouvez très bien relancer le jeu, même si ce sera les mêmes...";
+                        var w = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "es")
                     {
-                        MessageBox.Show("No hay más pruebas. ¡Lo has clavado! \n Pero si sigues teniendo dudas, puedes reiniciar el juego, aunque sean las mismas...");
+                        textUse = "No hay más pruebas. ¡Lo has clavado! \n Pero si sigues teniendo dudas, puedes reiniciar el juego, aunque sean las mismas...";
+                        var w = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "en")
                     {
-                        MessageBox.Show("There are no more quizzes. You've killed it! \n But if you still have questions, you can always restart the game, even if it's the same ones...");
+                        textUse = "There are no more quizzes. You've killed it! \n But if you still have questions, you can always restart the game, even if it's the same ones...";
+                        var w = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "ar")
                     {
-                        MessageBox.Show("لم يعد هناك المزيد من الاختبارات. لقد نجحت \n ولكن إذا كانت لا تزال لديك أسئلة، يمكنك إعادة تشغيل اللعبة، حتى لو كانت الأسئلة نفسها");
+                        textUse = "لم يعد هناك المزيد من الاختبارات. لقد نجحت \n ولكن إذا كانت لا تزال لديك أسئلة، يمكنك إعادة تشغيل اللعبة، حتى لو كانت الأسئلة نفسها";
+                        var w = CustomDialogForm.Show(textUse, langue);
                     }
                     canRun();
                         return;
@@ -1998,27 +2092,39 @@ namespace Try_To_ESCAPE__GAME
                 stopRun();
                 if (langue == "fr")
                 {
-                    MessageBox.Show("VOUS N'AVEZ PAS PRIS LES PAPIERS (en tout cas pas tous) DONC VOUS DEVEZ RECOMMENCER !!!!! À PARTIR DE ZÉRO !!!!");
-                    MessageBox.Show("^^");
-                    MessageBox.Show(":D");
+                    textUse = "VOUS N'AVEZ PAS PRIS LES PAPIERS (en tout cas pas tous) DONC VOUS DEVEZ RECOMMENCER !!!!! À PARTIR DE ZÉRO !!!!";
+                    var w = CustomDialogForm.Show(textUse, langue);
+                    textUse = "^^";
+                    var a = CustomDialogForm.Show(textUse, langue);
+                    textUse = ":D";
+                    var s = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("NO HA TOMADO LOS PAPELES (al menos no todos) POR LO QUE DEBE RECOMENDAR !!!!! desde cero !!!!");
-                    MessageBox.Show("^^");
-                    MessageBox.Show(":D");
+                    textUse = "NO HA TOMADO LOS PAPELES (al menos no todos) POR LO QUE DEBE RECOMENDAR !!!!! desde cero !!!!";
+                    var w = CustomDialogForm.Show(textUse, langue);
+                    textUse = "^^";
+                    var a = CustomDialogForm.Show(textUse, langue);
+                    textUse = ":D";
+                    var s = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("لم تقم بأخذ الأوراق (على الأقل ليس كلها) لذا يجب عليك التوصية !!!!! من الصفر !!!!");
-                    MessageBox.Show("^^");
-                    MessageBox.Show(":D");
+                    textUse = "لم تقم بأخذ الأوراق (على الأقل ليس كلها) لذا يجب عليك التوصية  من الصفر";
+                    var w = CustomDialogForm.Show(textUse, langue);
+                    textUse = "^^";
+                    var a = CustomDialogForm.Show(textUse, langue);
+                    textUse = ":D";
+                    var s = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("YOU HAVE NOT TAKEN THE PAPERS (at least not all of them) SO YOU MUST RESTART !!!!! FROM ZERO !!!!");
-                    MessageBox.Show("^^");
-                    MessageBox.Show(":D");
+                    textUse = "YOU HAVE NOT TAKEN THE PAPERS (at least not all of them) SO YOU MUST RESTART !!!!! FROM ZERO !!!!";
+                    var w = CustomDialogForm.Show(textUse, langue);
+                    textUse = "^^";
+                    var a = CustomDialogForm.Show(textUse, langue);
+                    textUse = ":D";
+                    var s = CustomDialogForm.Show(textUse, langue);
                 }
                 Application.Exit();
                 canRun();

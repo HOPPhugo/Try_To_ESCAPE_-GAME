@@ -16,13 +16,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 
 namespace Try_To_ESCAPE__GAME
 {
@@ -32,6 +29,7 @@ namespace Try_To_ESCAPE__GAME
         double time = 0; // quand fire arrvie à 250, time part de zero et fait un chrono ne 10 seconde. Si fire tombe en dessous de 240, time se remet à zero
         bool speak = false;// false : le texte de fin n'est pas encore apparu / true : le texte de fin est déjà apparu
         bool timer = false; // false : timer désactivé | true : timer activé
+        string textUse; // variable contenant le texte besoin pour le "CustomMessageBox"
         string langue = "fr"; // langue choisie par le joueur dans le menu en appuyant sur le bouton "langue"
         string path = AppDomain.CurrentDomain.BaseDirectory; // chemin de ce fichier
         bool menu = false; // false : menu fermé / true : menu ouvert
@@ -57,6 +55,735 @@ namespace Try_To_ESCAPE__GAME
         private void Form3_Load(object sender, EventArgs e)
         {
 
+        }
+        public partial class CustomDialogForm : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
+
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(padding, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.OK,
+                    Width = 100,
+                    Height = 30,
+                    Location = new Point((formWidth - 100) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+                int newSize = 12;
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+                btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
+                btnOK.MouseLeave += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, 8);
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK });
+                this.AcceptButton = btnOK;
+
+                // Pour éviter les problèmes de focus
+                btnOK.TabIndex = 0;
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    case "es": return "De acuerdo";
+                    case "ar": return "موافق";
+                    default: return "OK"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm form = new CustomDialogForm(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
+        }
+        public partial class CustomDialogForm3 : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
+
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm3()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm3(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+                this.MinimumSize = new System.Drawing.Size(170, 20);
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(+25, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+                Button btnNo = new Button
+                {
+                    DialogResult = DialogResult.No,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth + 0) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText2(langue)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.Yes,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth - 150) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+                int newSize = 12;
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+                btnNo.MouseMove += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, newSize);
+                btnNo.MouseLeave += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, 8);
+                btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
+                btnOK.MouseLeave += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, 8);
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK, btnNo });
+
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Yes"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText1(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Cancel"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText2(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "No"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // fluidifie
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm3 form = new CustomDialogForm3(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm3 form = new CustomDialogForm3(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm3 form = new CustomDialogForm3(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
+        }
+        public partial class CustomDialogForm2 : Form
+        {
+            // Cache statique pour l'image de fond
+            private static Image backgroundImageCache;
+
+            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
+
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            private static Font labelFont;
+
+            public DialogResult Result { get; private set; }
+            private string _Text;
+            private string _langue;
+
+            static CustomDialogForm2()
+            {
+                // Initialisation des ressources statiques
+                labelFont = new Font("Segoe UI", 10);
+            }
+
+            // Méthode statique pour précharger l'image et initialiser les ressources
+            public static void PreloadResources()
+            {
+                if (backgroundImageCache == null)
+                {
+                    // Charge l'image en mémoire une seule fois
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+                }
+            }
+
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            private static Size GetTextSize(string text, int maxWidth)
+            {
+                string cacheKey = text + "_" + maxWidth.ToString();
+
+                // Utilise la taille mise en cache si disponible
+                if (textSizeCache.ContainsKey(cacheKey))
+                    return textSizeCache[cacheKey];
+
+                // Calcule et met en cache la taille pour les prochaines utilisations
+                Size textSize;
+                using (Bitmap dummyBitmap = new Bitmap(1, 1))
+                using (Graphics g = Graphics.FromImage(dummyBitmap))
+                {
+                    textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
+                }
+
+                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                if (textSizeCache.Count > 100)
+                {
+                    // Simple stratégie : vide le cache s'il devient trop grand
+                    textSizeCache.Clear();
+                }
+                textSizeCache[cacheKey] = textSize;
+
+                return textSize;
+            }
+
+            public CustomDialogForm2(string text, string langue)
+            {
+                // Configuration initiale avec double buffering pour éviter les scintillements
+                this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                              ControlStyles.AllPaintingInWmPaint |
+                              ControlStyles.UserPaint,
+                              true);
+
+                this.SuspendLayout();
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.StartPosition = FormStartPosition.CenterParent;
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+
+                // Utilise l'image du cache
+                if (backgroundImageCache == null)
+                    backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
+
+                this.BackgroundImage = backgroundImageCache;
+
+                _Text = text;
+                _langue = langue;
+
+                // Constantes pour le layout
+                const int maxWidth = 400;
+                const int padding = 20;
+
+                // Utilise la fonction optimisée pour calculer la taille du texte
+                Size textSizes = GetTextSize(_Text, maxWidth);
+                this.MinimumSize = new System.Drawing.Size(270, 20);
+                // Calcul optimisé des dimensions
+                int formWidth = textSizes.Width + 2 * padding;
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+
+                // Définit la taille du formulaire immédiatement
+                this.ClientSize = new Size(formWidth, formHeight);
+
+                // Création du label avec les dimensions précalculées
+                Label lblMessage = new Label
+                {
+                    Text = _Text,
+                    AutoSize = false,
+                    Size = textSizes,
+                    Location = new Point(+50, padding),
+                    BackColor = Color.Transparent,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = labelFont,
+                    ForeColor = Color.Black,
+                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                };
+                Button btnCancel = new Button
+                {
+                    DialogResult = DialogResult.Cancel,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth + 165) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText1(langue)
+                };
+                Button btnNo = new Button
+                {
+                    DialogResult = DialogResult.No,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth + 0) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText2(langue)
+                };
+
+                // Création du bouton (optimisée)
+                Button btnOK = new Button
+                {
+                    DialogResult = DialogResult.OK,
+                    Width = 70,
+                    Height = 30,
+                    Location = new Point((formWidth - 165) / 2, lblMessage.Bottom + padding),
+                    BackColor = Color.FromArgb(0x4CAF50),
+                    ForeColor = Color.Black,
+                    FlatStyle = FlatStyle.Flat,
+                    FlatAppearance = { BorderSize = 0 },
+                    Text = GetButtonText(langue)
+                };
+                int newSize = 12;
+                // Délégués pré-alloués pour éviter les créations multiples
+                lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
+                lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
+                btnCancel.MouseMove += (s, e) => btnCancel.Font = new Font(btnCancel.Font.FontFamily, newSize);
+                btnCancel.MouseLeave += (s, e) => btnCancel.Font = new Font(btnCancel.Font.FontFamily, 8);
+                btnNo.MouseMove += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, newSize);
+                btnNo.MouseLeave += (s, e) => btnNo.Font = new Font(btnNo.Font.FontFamily, 8);
+                btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
+                btnOK.MouseLeave += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, 8);
+
+                // Utilisation de Controls.AddRange pour ajouter tous les contrôles en une seule fois
+                this.Controls.AddRange(new Control[] { lblMessage, btnOK, btnCancel, btnNo });
+
+
+                this.ResumeLayout(false);
+            }
+
+            // Méthode helper pour déterminer le texte du bouton selon la langue
+            private string GetButtonText(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Yes"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText1(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "Cancel"; // fr, en, etc.
+                }
+            }
+            private string GetButtonText2(string langue)
+            {
+                switch (langue.ToLowerInvariant())
+                {
+                    default: return "No"; // fr, en, etc.
+                }
+            }
+
+            // Optimisation: évite les redessins inutiles
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    CreateParams cp = base.CreateParams;
+                    cp.ExStyle |= 0x02000000; // fluidifie
+                    return cp;
+                }
+            }
+
+            public static DialogResult Show(string text, string langue)
+            {
+                // Précharge les ressources si nécessaire
+                EnsureResourcesLoaded();
+
+                using (CustomDialogForm2 form = new CustomDialogForm2(text, langue))
+                {
+                    return form.ShowDialog();
+                }
+            }
+
+            // Version asynchrone préférée pour ne pas bloquer l'interface
+            public static async Task<DialogResult> ShowAsync(string text, string langue)
+            {
+                // Précharge les ressources de manière asynchrone
+                await Task.Run(() => EnsureResourcesLoaded());
+
+                // Optimisation: précalcule la taille du texte en arrière-plan
+                await Task.Run(() => GetTextSize(text, 400));
+
+                // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
+                TaskCompletionSource<DialogResult> tcs = new TaskCompletionSource<DialogResult>();
+
+                Form mainForm = Application.OpenForms.Count > 0 ? Application.OpenForms[0] : null;
+
+                if (mainForm != null && !mainForm.IsDisposed)
+                {
+                    mainForm.BeginInvoke(new Action(() =>
+                    {
+                        using (CustomDialogForm2 form = new CustomDialogForm2(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog(mainForm);
+                            tcs.SetResult(result);
+                        }
+                    }));
+                }
+                else
+                {
+                    // Fallback si aucun formulaire principal n'est disponible
+                    await Task.Run(() =>
+                    {
+                        using (CustomDialogForm2 form = new CustomDialogForm2(text, langue))
+                        {
+                            DialogResult result = form.ShowDialog();
+                            tcs.SetResult(result);
+                        }
+                    });
+                }
+
+                return await tcs.Task;
+            }
+
+            // S'assure que toutes les ressources sont chargées
+            private static void EnsureResourcesLoaded()
+            {
+                if (backgroundImageCache == null)
+                    PreloadResources();
+
+                if (labelFont == null)
+                    labelFont = new Font("Segoe UI", 10);
+            }
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -525,21 +1252,25 @@ namespace Try_To_ESCAPE__GAME
             if (arrondi == 10 && speak == false)
             {
                 speak = true;
-                if (langue == "fr"){
-                    MessageBox.Show("Magnifique entrainement vous avez tenu les 10 secondes au max de votre Vitesse ! Votre prise de masse est alucinante ! ");
-
+                if (langue == "fr")
+                {
+                    textUse = "Magnifique entrainement vous avez tenu les 10 secondes au max de votre Vitesse ! Votre prise de masse est alucinante ! ";
+                    DialogResult result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "es")
                 {
-                    MessageBox.Show("Magnífico entrenamiento, ¡has durado 10 segundos a máxima velocidad! ¡Tu aumento de peso es asombroso! ");
+                    textUse = "Magnífico entrenamiento, ¡has durado 10 segundos a máxima velocidad! ¡Tu aumento de peso es asombroso! ";
+                    DialogResult result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "en")
                 {
-                    MessageBox.Show("Magnificent training - you lasted 10 seconds at your maximum speed! Your weight gain is amazing! ");
+                    textUse = "Magnificent training - you lasted 10 seconds at your maximum speed! Your weight gain is amazing! ";
+                    DialogResult result = CustomDialogForm.Show(textUse, langue);
                 }
                 if (langue == "ar")
                 {
-                    MessageBox.Show("تدريب رائع، لقد استغرقت 10 ثوانٍ بأقصى سرعة! زيادة وزنك مذهلة ");
+                    textUse = "تدريب رائع، لقد استغرقت 10 ثوانٍ بأقصى سرعة! زيادة وزنك مذهلة ";
+                    DialogResult result = CustomDialogForm.Show(textUse, langue);
                 }
                 this.Hide();
                 string filename2 = path + @"\fini.txt";
@@ -717,52 +1448,59 @@ namespace Try_To_ESCAPE__GAME
 
         }
 
-        private void button13_Click(object sender, EventArgs e) // si on clique sur le bouton langue, une fenêtre s'ouvre pour nous laisser changer de langue du texte
+        private void button13_Click(object sender, EventArgs e) // si on clique sur le bouton de changement de langue
         {
             this.ActiveControl = null; // Désélectionne le bouton
 
             if (langue == "fr")
             {
-                DialogResult Language = MessageBox.Show("Choisissez votre langue. \n O = Français \n N = English \n A = + de langues", "Langue", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "Choisissez votre langue. \n Y = Français \n N = English \n C = + de langues";
+                var r = CustomDialogForm2.Show(textUse, langue);
+                if (r == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu est déjà en Français.");
+                    textUse = "Votre jeu est déjà en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     langue = "fr";
                     button13.Text = "Langue : Français";
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (r == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     langue = "en";
                     button13.Text = "Language : English";
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (r == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("Choisissez votre langue. \n O = العربية \n N = Español \n A = Annuler", "Langue", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "Choisissez votre langue. \n Y = العربية \n N = Español \n C = Annuler";
+                    var res = CustomDialogForm2.Show(textUse, langue);
+                    if (res == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (res == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (res == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Votre jeu est resté en Français.");
                         langue = "fr";
+                        textUse = "Votre jeu est resté en Français.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         fr();
                         return;
                     }
@@ -770,46 +1508,53 @@ namespace Try_To_ESCAPE__GAME
             }
             if (langue == "en")
             {
-                DialogResult Language = MessageBox.Show("Choose your language. \n O = Français \n N = English \n A = more languages", "Language", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "Choose your language. \n Y = Français \n N = English \n C = more languages";
+                var res = CustomDialogForm2.Show(textUse, langue);
+                if (res == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     button13.Text = "Langue : Français";
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (res == DialogResult.No)
                 {
-                    MessageBox.Show("Your game is already in English.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game is already in English.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (res == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("Choose your language. \n O = العربية \n N = Español \n A = Cancel", "Language", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "Choose your language. \n Y = العربية \n N = Español \n C = Cancel";
+                    var esr = CustomDialogForm2.Show(textUse, langue);
+                    if (esr == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (esr == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (esr == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Your game has remained in English.");
                         langue = "en";
+                        textUse = "Your game has remained in English.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         en();
                         return;
                     }
@@ -817,91 +1562,105 @@ namespace Try_To_ESCAPE__GAME
             }
             if (langue == "ar")
             {
-                DialogResult Language = MessageBox.Show("اختر لغتك. \n O = Français \n N = English \n A = المزيد من اللغات", "لُغَةٌ", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "اختر لغتك. \n Y = Français \n N = English \n C = المزيد من اللغات";
+                var esr = CustomDialogForm2.Show(textUse, langue);
+                if (esr == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     button13.Text = "Langue : Français";
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (esr == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (esr == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("اختر لغتك. \n O = العربية \n N = Español \n A = إلغاء الأمر ", "لُغَةٌ", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "اختر لغتك. \n Y = العربية \n N = Español \n C = إلغاء الأمر ";
+                    var res = CustomDialogForm2.Show(textUse, langue);
+                    if (res == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لعبتك باللغة العربية بالفعل");
+                        textUse = "لعبتك باللغة العربية بالفعل";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (res == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ha cambiado en español.");
+                        textUse = "Tu juego ha cambiado en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "lengua : Español";
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (res == DialogResult.Cancel)
                     {
-                        MessageBox.Show("بقيت لعبتك باللغة العربية");
-                        langue = "ar";
                         ar();
+                        langue = "ar";
+                        textUse = "بقيت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         return;
                     }
                 }
             }
             if (langue == "es")
             {
-                DialogResult Language = MessageBox.Show("Elige tu idioma. \n O = Français \n N = English \n A = Más Idioma", "lengua", MessageBoxButtons.YesNoCancel);
-                if (Language == DialogResult.Yes)
+                textUse = "Elige tu idioma. \n Y = Français \n N = English \n C = Más Idioma";
+                var res = CustomDialogForm2.Show(textUse, langue);
+                if (res == DialogResult.Yes)
                 {
-                    MessageBox.Show("Votre jeu à changer en Français.");
                     langue = "fr";
+                    textUse = "Votre jeu à changer en Français.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     button13.Text = "Langue : Français";
                     fr();
                     return;
                 }
-                if (Language == DialogResult.No)
+                if (res == DialogResult.No)
                 {
-                    MessageBox.Show("Your game changed to English language.");
                     button13.Text = "Language : English";
                     langue = "en";
+                    textUse = "Your game changed to English language.";
+                    var result = CustomDialogForm.Show(textUse, langue);
                     en();
                     return;
                 }
-                if (Language == DialogResult.Cancel)
+                if (res == DialogResult.Cancel)
                 {
-                    DialogResult Language2 = MessageBox.Show("Elige tu idioma. \n O = العربية \n N = Español \n A = Cancelar", "lengua", MessageBoxButtons.YesNoCancel);
-                    if (Language2 == DialogResult.Yes)
+                    textUse = "Elige tu idioma. \n Y = العربية \n N = Español \n C = Cancelar";
+                    var ress = CustomDialogForm2.Show(textUse, langue);
+                    if (ress == DialogResult.Yes)
                     {
                         langue = "ar";
-                        MessageBox.Show("لقد تغيرت لعبتك باللغة العربية.");
+                        textUse = "لقد تغيرت لعبتك باللغة العربية";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         button13.Text = "لُغَةٌ : العربية";
                         ar();
                         return;
                     }
-                    if (Language2 == DialogResult.No)
+                    if (ress == DialogResult.No)
                     {
                         langue = "es";
-                        MessageBox.Show("Tu juego ya está en español.");
+                        textUse = "Tu juego ya está en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         es();
                         return;
                     }
-                    if (Language2 == DialogResult.Cancel)
+                    if (ress == DialogResult.Cancel)
                     {
-                        MessageBox.Show("Tu juego ha permanecido en español.");
                         langue = "es";
+                        textUse = "Tu juego ha permanecido en español.";
+                        var result = CustomDialogForm.Show(textUse, langue);
                         es();
                         return;
                     }
@@ -946,52 +1705,56 @@ namespace Try_To_ESCAPE__GAME
             this.ActiveControl = null; // Désélectionne le bouton 
         }
 
-        private void button14_Click(object sender, EventArgs e) // si on appuie sur le bouton réinitialiser
+        private void button14_Click(object sender, EventArgs e)// si on clique sur le de réinitialisation
         {
             if (langue == "fr")
             {
-                DialogResult rn = MessageBox.Show("Voulez vous vraiment TOUT recommencer ?", "Réinitialiser", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "Voulez vous vraiment TOUT recommencer ?";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart(); // relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
             }
             if (langue == "en")
             {
-                DialogResult rn = MessageBox.Show("Do you really want to start ALL over again?", "Restart", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "Do you really want to start ALL over again?";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart();// relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
             }
             if (langue == "es")
             {
-                DialogResult rn = MessageBox.Show("¿De verdad quieres empezar TODO de nuevo?", "Restablecimiento", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "¿De verdad quieres empezar TODO de nuevo?";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart();// relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
             }
             if (langue == "ar")
             {
-                DialogResult rn = MessageBox.Show("هل تريد حقا أن تبدأ من جديد؟", "اعاده تعيين", MessageBoxButtons.YesNo);
-                if (rn == DialogResult.Yes)
+                textUse = "هل تريد حقا أن تبدأ من جديد؟";
+                var ress = CustomDialogForm3.Show(textUse, langue);
+                if (ress == DialogResult.Yes)
                 {
                     Application.Restart();// relance le jeu
                 }
-                if (rn == DialogResult.No)
+                if (ress == DialogResult.No)
                 {
 
                 }
@@ -1024,36 +1787,25 @@ namespace Try_To_ESCAPE__GAME
         {
             if (langue == "fr")
             {
-                DialogResult crédits = MessageBox.Show("Réalisateur du jeu : Hugo Schweizer \nGame Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoix : Chadi Toundi \nTête : Chadi Toundi \nTraduction en Arabe : Chadi Toundi ", "Crédits", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Réalisateur du jeu : Hugo Schweizer \nGame Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nVoix : Chadi Toundi \nTête : Chadi Toundi \nTraduction en Arabe : Chadi Toundi\nContributions créatives : Chadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "en")
             {
-                DialogResult crédits = MessageBox.Show("Game Director : Hugo Schweizer \nLead Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoice : Chadi Toundi \nHead : Chadi Toundi \nArabic Traduction : Chadi Toundi ", "Credits", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Game Director : Hugo Schweizer \nLead Designer : Hugo Schweizer \nLevel Designer : Hugo Schweizer \nGameplay Programmer : Hugo Schweizer \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nVoice : Chadi Toundi \nHead : Chadi Toundi \nArabic Traduction : Chadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "es")
             {
-                DialogResult crédits = MessageBox.Show("Director de Juego : Hugo Schweizer \nDiseñador de juegos : Hugo Schweizer \nDiseñador de niveles : Hugo Schweizer \nProgramación de juegos : Hugo Schweizer \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nVoz : Chadi Toundi \nCabeza : Chadi Toundi \nTraducción al árabe : Chadi Toundi ", "Crédits", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Director de Juego : Hugo Schweizer \nDiseñador de juegos : Hugo Schweizer \nDiseñador de niveles : Hugo Schweizer \nProgramación de juegos : Hugo Schweizer \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nVoz : Chadi Toundi \nCabeza : Chadi Toundi \nTraducción al árabe : Chadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
             if (langue == "ar")
             {
-                DialogResult crédits = MessageBox.Show("Hugo Schweizer : مدير اللعبة  \nHugo Schweizer : مصمم الألعاب \nHugo Schweizer : مصمم المستوى \nHugo Schweizer : برمجة اللعب  \n \n \n \n \n ------------------------------------------------------------------------------ \n \n \n \n \nChadi Toundi : صوت \nChadi Toundi : رأس \nChadi Toundi : الترجمة العربيةChadi Toundi ", "الائتمانات", MessageBoxButtons.OK);
-                if (crédits == DialogResult.OK)
-                {
-
-                }
+                textUse = "Hugo Schweizer : مدير اللعبة  \nHugo Schweizer : مصمم الألعاب \nHugo Schweizer : مصمم المستوى \nHugo Schweizer : برمجة اللعب  \n \n \n \n \n ---------------------------------------------- \n \n \n \n \nChadi Toundi : صوت \nChadi Toundi : رأس \nChadi Toundi : الترجمة العربيةChadi Toundi ";
+                DialogResult result = CustomDialogForm.Show(textUse, langue);
             }
+
         }
     }
 }
