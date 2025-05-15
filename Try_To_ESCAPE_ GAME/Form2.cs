@@ -671,7 +671,7 @@ namespace Try_To_ESCAPE__GAME
                 // Création du bouton (optimisée)
                 Button btnOK = new Button
                 {
-                    DialogResult = DialogResult.OK,
+                    DialogResult = DialogResult.Yes,
                     Width = 70,
                     Height = 30,
                     Location = new Point((formWidth - 165) / 2, lblMessage.Bottom + padding),
