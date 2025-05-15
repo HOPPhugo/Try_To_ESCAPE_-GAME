@@ -38,6 +38,7 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.panel96 = new System.Windows.Forms.Panel();
+            this.label13 = new System.Windows.Forms.Label();
             this.button15 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
@@ -53,7 +54,6 @@
             this.Red = new System.Windows.Forms.Panel();
             this.jauge = new System.Windows.Forms.Panel();
             this.timer3 = new System.Windows.Forms.Timer(this.components);
-            this.label13 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel98.SuspendLayout();
             this.panel96.SuspendLayout();
@@ -170,6 +170,18 @@
             this.panel96.Click += new System.EventHandler(this.panel96_Click);
             this.panel96.Paint += new System.Windows.Forms.PaintEventHandler(this.panel96_Paint);
             // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label13.ForeColor = System.Drawing.Color.White;
+            this.label13.Location = new System.Drawing.Point(757, 7);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(41, 15);
+            this.label13.TabIndex = 7;
+            this.label13.Text = "Crédits";
+            this.label13.Click += new System.EventHandler(this.label13_Click);
+            // 
             // button15
             // 
             this.button15.Location = new System.Drawing.Point(363, 399);
@@ -275,7 +287,7 @@
             this.Yellow.BackColor = System.Drawing.Color.Yellow;
             this.Yellow.Location = new System.Drawing.Point(661, 274);
             this.Yellow.Name = "Yellow";
-            this.Yellow.Size = new System.Drawing.Size(61, 133);
+            this.Yellow.Size = new System.Drawing.Size(61, 64);
             this.Yellow.TabIndex = 14;
             this.Yellow.Visible = false;
             // 
@@ -284,7 +296,7 @@
             this.Orange.BackColor = System.Drawing.Color.Orange;
             this.Orange.Location = new System.Drawing.Point(661, 224);
             this.Orange.Name = "Orange";
-            this.Orange.Size = new System.Drawing.Size(61, 183);
+            this.Orange.Size = new System.Drawing.Size(61, 52);
             this.Orange.TabIndex = 15;
             this.Orange.Visible = false;
             // 
@@ -293,7 +305,7 @@
             this.Red.BackColor = System.Drawing.Color.Red;
             this.Red.Location = new System.Drawing.Point(661, 182);
             this.Red.Name = "Red";
-            this.Red.Size = new System.Drawing.Size(61, 225);
+            this.Red.Size = new System.Drawing.Size(61, 47);
             this.Red.TabIndex = 16;
             this.Red.Visible = false;
             // 
@@ -311,18 +323,6 @@
             this.timer3.Enabled = true;
             this.timer3.Interval = 10;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label13.ForeColor = System.Drawing.Color.White;
-            this.label13.Location = new System.Drawing.Point(757, 7);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(41, 15);
-            this.label13.TabIndex = 7;
-            this.label13.Text = "Crédits";
-            this.label13.Click += new System.EventHandler(this.label13_Click);
             // 
             // Form3
             // 

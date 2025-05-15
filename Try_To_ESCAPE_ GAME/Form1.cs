@@ -72,12 +72,14 @@ namespace Try_To_ESCAPE__GAME
         bool labelmr = true; // false le label du marteau n'est pas visible / si true il est visible
         bool labelcl = true;// false le label du bocal n'est pas visible / si true il est visible
         bool moveLeft, moveRight, moveUp, moveDown; // initialisation des mouvements du personnage.
-        string textUse; // variable contenant le texte besoin pour le "CustomMessageBox"
+        string textUse; // variable contenant le texte pour le "CustomMessageBox"
+        // le custom messagebox est une alternative au messagebox de VisualStudio, car ceux de vs ne peuvent être modifier outre du texte, donc j'ai fait ces "CustomMessageBox" pour povoir modifier l0'image de fond et les boutons.
         public Form1()
         {
             InitializeComponent();
             epreuve(); // appelle la fonction pour les épreuves
-            spawn(); // permet de nous fair apparraître au point de déprart
+            spawn(); // permet de nous faire apparraître au point de départ
+            devMod();
             Form5 frm = new Form5(); // ouvre le form5 (le timer)
             frm.Show();
             panel12.GetType().InvokeMember("DoubleBuffered", // permet de rendre plus fluide le jeu.
@@ -91,7 +93,7 @@ namespace Try_To_ESCAPE__GAME
         {
 
         }
-        public partial class CustomDialogForm : Form
+        public partial class CustomDialogForm : Form //cération d'un messagebox customisable
         {
             // Cache statique pour l'image de fond
             private static Image backgroundImageCache;
@@ -103,8 +105,8 @@ namespace Try_To_ESCAPE__GAME
             private static Font labelFont;
 
             public DialogResult Result { get; private set; }
-            private string _Text;
-            private string _langue;
+            private string _Text; // variable pour garder les données de "textUse" et les réutiliser dans CustomDialogForm
+            private string _langue;// variable pour garder les données de "langue" et les réutiliser dans CustomDialogForm
 
             static CustomDialogForm()
             {
@@ -224,8 +226,6 @@ namespace Try_To_ESCAPE__GAME
                 this.Controls.AddRange(new Control[] { lblMessage, btnOK });
                 this.AcceptButton = btnOK;
 
-                // Pour éviter les problèmes de focus
-                btnOK.TabIndex = 0;
 
                 this.ResumeLayout(false);
             }
@@ -247,7 +247,7 @@ namespace Try_To_ESCAPE__GAME
                 get
                 {
                     CreateParams cp = base.CreateParams;
-                    cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                    cp.ExStyle |= 0x02000000;
                     return cp;
                 }
             }
