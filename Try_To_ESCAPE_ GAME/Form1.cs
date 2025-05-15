@@ -79,7 +79,6 @@ namespace Try_To_ESCAPE__GAME
             InitializeComponent();
             epreuve(); // appelle la fonction pour les épreuves
             spawn(); // permet de nous faire apparraître au point de départ
-            devMod();
             Form5 frm = new Form5(); // ouvre le form5 (le timer)
             frm.Show();
             panel12.GetType().InvokeMember("DoubleBuffered", // permet de rendre plus fluide le jeu.
