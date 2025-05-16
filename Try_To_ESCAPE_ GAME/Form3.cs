@@ -31,7 +31,7 @@ namespace Try_To_ESCAPE__GAME
         bool timer = false; // false : timer désactivé | true : timer activé
         string textUse; // variable contenant le texte besoin pour le "CustomMessageBox"
         string langue = "fr"; // langue choisie par le joueur dans le menu en appuyant sur le bouton "langue"
-        string path = AppDomain.CurrentDomain.BaseDirectory; // chemin de ce fichier
+        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // chemin de ce fichier
         bool menu = false; // false : menu fermé / true : menu ouvert
         public Form3()
         {

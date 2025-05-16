@@ -64,7 +64,7 @@ namespace Try_To_ESCAPE__GAME
         bool Marteau = false; // false si on ne possède pas le marteau / true si on le possède
         bool parler = false; // false si on peut pas parler au pnj / true si on peut
         int rage2 = 0; // il y a deux moments ou il y a la rage, il fonctionne comme "rage"
-        string path = AppDomain.CurrentDomain.BaseDirectory; // récupère le chemin d'accès de mon jeu ( je l'utilise pour crée et trouver les fichier pour les events)
+        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // récupère le chemin d'accès de mon jeu ( je l'utilise pour crée et trouver les fichier pour les events)
         bool interact = false; // false si E n'est pas pressé / true si E est pressé
         int sleep = 0; // force a appuyer deux fois sur le bocal après l'avoir cassé
         bool bocalcassé = false; // false si le bocal est intacte / true si il est cassé
@@ -74,6 +74,7 @@ namespace Try_To_ESCAPE__GAME
         bool moveLeft, moveRight, moveUp, moveDown; // initialisation des mouvements du personnage.
         string textUse; // variable contenant le texte pour le "CustomMessageBox"
         bool pianocasse = false;
+        
         // le custom messagebox est une alternative au messagebox de VisualStudio, car ceux de vs ne peuvent être modifier outre du texte, donc j'ai fait ces "CustomMessageBox" pour povoir modifier l0'image de fond et les boutons.
         public Form1()
         {

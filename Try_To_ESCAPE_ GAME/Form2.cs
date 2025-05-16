@@ -38,7 +38,7 @@ namespace Try_To_ESCAPE__GAME
         bool level2 = false; // false : pas répondu à toutes les questions / True :  répondu à toutes les questions juste 
         bool Change = false; // false : Le personnage est toujours dans le monde 2 / true : Le personnage à changer de monde
         bool menu = false; // false menu fermé: / True : menu ouvert
-        string path = AppDomain.CurrentDomain.BaseDirectory; // chemin d'accès de ce fichier
+        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // chemin d'accès de ce fichier
         bool question7 = false; // false : pas répondu juste à la septième question / True : Répondu juste à la septième question
         bool move = true; // false : ne peut pas bouger / True : peut bouger
         bool interact =  false; // false : E n'est pas enfoncé / True : E est enfoncé

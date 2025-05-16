@@ -30,7 +30,7 @@ namespace Try_To_ESCAPE__GAME
             InitializeComponent();
         }
         double time; // sert de chrono, chaque 0.1 seconde on lui ajoute 0.1 ( il est arrondi avec la variable "arrondie" permettant de ne pas avoir ces chiffres : 9.999999999999 )
-        string path = AppDomain.CurrentDomain.BaseDirectory; // reprends le chemin d'accès de ce fichier
+        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // reprends le chemin d'accès de ce fichier
         string langue = "fr"; // langue choisi par l'utilisateur ( en appuyant sur le bouton "langue" une fenêtre s'ouvre pour laisser le choix à l'utilisateur entre l'anglais, le français, l'espagnol et l'arabe )
         bool tr = false; // pour que le texte de fin se fasse qu'une seule foix (si tr == false, le texte apprait puis tr devients true)
         private void label10_Click(object sender, EventArgs e)

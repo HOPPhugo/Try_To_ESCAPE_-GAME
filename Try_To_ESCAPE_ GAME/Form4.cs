@@ -25,7 +25,7 @@ namespace Try_To_ESCAPE__GAME
     
     public partial class Form4 : Form
     {
-        string path = AppDomain.CurrentDomain.BaseDirectory; // reprends le chemin d'accès de ce fichier
+        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // reprends le chemin d'accès de ce fichier
         public Form4()
         {
             InitializeComponent();
