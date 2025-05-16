@@ -73,6 +73,7 @@ namespace Try_To_ESCAPE__GAME
         bool labelcl = true;// false le label du bocal n'est pas visible / si true il est visible
         bool moveLeft, moveRight, moveUp, moveDown; // initialisation des mouvements du personnage.
         string textUse; // variable contenant le texte pour le "CustomMessageBox"
+        bool pianocasse = false;
         // le custom messagebox est une alternative au messagebox de VisualStudio, car ceux de vs ne peuvent être modifier outre du texte, donc j'ai fait ces "CustomMessageBox" pour povoir modifier l0'image de fond et les boutons.
         public Form1()
         {
@@ -2683,6 +2684,7 @@ namespace Try_To_ESCAPE__GAME
                     stopRun();
                     if (langue == "fr"){
                         textUse = "Bravo ! \n Vous avez le rythme dans la peau ! \n Vous pouvez désormai changer de salle !";
+                        
                         var result = CustomDialogForm.Show(textUse, langue);
                     }
                     if (langue == "es")
@@ -2790,6 +2792,9 @@ namespace Try_To_ESCAPE__GAME
                     canRun();
                     Papier2.Visible = true;
                     juste = true;
+                    pictureBox6.Image = Properties.Resources.piano_break;
+                    piano = false;
+                    pianocasse = true;
                     panel65.Visible = false;
                     panel75.Visible = false;
                     panel65.Tag = "salle2";
@@ -3984,7 +3989,7 @@ namespace Try_To_ESCAPE__GAME
                 }
                 if (x is Panel && (string)x.Tag == "ShipInt") 
                 {
-                    if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && piano == true) // si on interagie avec le piano
+                    if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && piano == true && pianocasse == false) // si on interagie avec le piano
                     {
                        button4.Visible = true;
                        button5.Visible = true;
