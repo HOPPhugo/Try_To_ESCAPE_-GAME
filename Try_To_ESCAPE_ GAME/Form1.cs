@@ -45,7 +45,7 @@ namespace Try_To_ESCAPE_GAME
         bool bouton2 = false;// si on intéragi sur le "bouton2" dans la deuxième salle, bouton2 devient true
         bool portal = true; // si on prends le portail, il devient false.
         double time = 0; 
-        bool correct = false; // si on à juste à la première question du PNJ, il devient true
+        bool correct = false; //si on à juste à la première question du PNJ, il devient true
         bool start = false; // si start est égale à true et que le joueur intéragi avec le bateau, le jeu bataille navale se lance.
         bool piano = false; // si on réussi l'épreuve du piano, il devient true
         bool bouton3 = false; // si on intéragi sur le "bouton3" dans la deuxième salle, bouton3 devient true
@@ -3737,7 +3737,7 @@ namespace Try_To_ESCAPE_GAME
                     Application.Restart();// relance le jeu
                 }
                 if (ress == DialogResult.No)
-                {
+                { 
 
                 }
             }
@@ -3773,7 +3773,7 @@ namespace Try_To_ESCAPE_GAME
 
         private void panel98_Paint(object sender, PaintEventArgs e)
         {
-            
+             
         }
 
         private void label13_Click(object sender, EventArgs e)
