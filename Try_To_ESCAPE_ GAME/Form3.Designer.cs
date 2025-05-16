@@ -1,4 +1,4 @@
-﻿namespace Try_To_ESCAPE__GAME
+﻿namespace Try_To_ESCAPE_GAME
 {
     partial class Form3
     {
@@ -73,7 +73,7 @@
             // 
             // panel1
             // 
-            this.panel1.BackgroundImage = global::Try_To_ESCAPE__GAME.Properties.Resources.piste_de_course;
+            this.panel1.BackgroundImage = global::Try_To_ESCAPE_GAME.Properties.Resources.piste_de_course;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel1.Controls.Add(this.panel98);
             this.panel1.Controls.Add(this.panel96);
@@ -265,7 +265,7 @@
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Yousport;
+            this.pictureBox1.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Yousport;
             this.pictureBox1.Location = new System.Drawing.Point(267, 182);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(276, 225);

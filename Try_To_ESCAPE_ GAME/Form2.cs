@@ -20,7 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Try_To_ESCAPE__GAME
+namespace Try_To_ESCAPE_GAME
 {
     public partial class Form2 : Form
     {

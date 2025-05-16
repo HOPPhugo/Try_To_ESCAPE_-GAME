@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{45AA697F-B25E-4D92-9817-666B062CD9D4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Try_To_ESCAPE__GAME</RootNamespace>
-    <AssemblyName>Try_To_ESCAPE_ GAME</AssemblyName>
+    <RootNamespace>Try_To_ESCAPE_GAME</RootNamespace>
+    <AssemblyName>Try_To_ESCAPE_GAME</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\game\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

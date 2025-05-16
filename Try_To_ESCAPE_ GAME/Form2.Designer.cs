@@ -1,4 +1,4 @@
-﻿namespace Try_To_ESCAPE__GAME
+﻿namespace Try_To_ESCAPE_GAME
 {
     partial class Form2
     {
@@ -70,7 +70,7 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Transparent;
-            this.panel1.BackgroundImage = global::Try_To_ESCAPE__GAME.Properties.Resources.Background;
+            this.panel1.BackgroundImage = global::Try_To_ESCAPE_GAME.Properties.Resources.Background;
             this.panel1.Controls.Add(this.panel98);
             this.panel1.Controls.Add(this.panel96);
             this.panel1.Controls.Add(this.label7);
@@ -324,7 +324,7 @@
             // pnj1
             // 
             this.pnj1.BackColor = System.Drawing.Color.Transparent;
-            this.pnj1.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.chadi_persos;
+            this.pnj1.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.chadi_persos;
             this.pnj1.Location = new System.Drawing.Point(206, 183);
             this.pnj1.Name = "pnj1";
             this.pnj1.Size = new System.Drawing.Size(73, 143);
@@ -346,7 +346,7 @@
             // 
             this.player.AccessibleDescription = "";
             this.player.BackColor = System.Drawing.Color.Transparent;
-            this.player.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.profil__2_;
+            this.player.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.profil__2_;
             this.player.Location = new System.Drawing.Point(376, 235);
             this.player.Name = "player";
             this.player.Size = new System.Drawing.Size(90, 62);

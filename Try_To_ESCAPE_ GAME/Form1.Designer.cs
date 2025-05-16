@@ -1,4 +1,4 @@
-﻿namespace Try_To_ESCAPE__GAME
+﻿namespace Try_To_ESCAPE_GAME
 {
 
     partial class Form1
@@ -278,7 +278,7 @@
             // 
             // panel12
             // 
-            this.panel12.BackgroundImage = global::Try_To_ESCAPE__GAME.Properties.Resources.Background_4;
+            this.panel12.BackgroundImage = global::Try_To_ESCAPE_GAME.Properties.Resources.Background_4;
             this.panel12.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.panel12.Controls.Add(this.panel98);
             this.panel12.Controls.Add(this.panel97);
@@ -511,7 +511,7 @@
             // 
             // pictureBox7
             // 
-            this.pictureBox7.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Loupe;
+            this.pictureBox7.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Loupe;
             this.pictureBox7.Location = new System.Drawing.Point(290, 140);
             this.pictureBox7.Name = "pictureBox7";
             this.pictureBox7.Size = new System.Drawing.Size(281, 224);
@@ -523,7 +523,7 @@
             // 
             // pictureBox5
             // 
-            this.pictureBox5.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Capture_removebg_preview;
+            this.pictureBox5.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Capture_removebg_preview;
             this.pictureBox5.Location = new System.Drawing.Point(164, 3);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(520, 171);
@@ -637,7 +637,7 @@
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.arbre;
+            this.pictureBox1.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.arbre;
             this.pictureBox1.Location = new System.Drawing.Point(902, 16);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(215, 194);
@@ -772,7 +772,7 @@
             // pnj1
             // 
             this.pnj1.BackColor = System.Drawing.Color.Transparent;
-            this.pnj1.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.chadi_persos;
+            this.pnj1.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.chadi_persos;
             this.pnj1.Location = new System.Drawing.Point(14, 25);
             this.pnj1.Name = "pnj1";
             this.pnj1.Size = new System.Drawing.Size(73, 143);
@@ -783,7 +783,7 @@
             // Papier3
             // 
             this.Papier3.BackColor = System.Drawing.Color.Transparent;
-            this.Papier3.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Minecraft_paper;
+            this.Papier3.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Minecraft_paper;
             this.Papier3.Location = new System.Drawing.Point(19, 982);
             this.Papier3.Name = "Papier3";
             this.Papier3.Size = new System.Drawing.Size(22, 13);
@@ -805,7 +805,7 @@
             // Papier2
             // 
             this.Papier2.BackColor = System.Drawing.Color.Transparent;
-            this.Papier2.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Minecraft_paper;
+            this.Papier2.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Minecraft_paper;
             this.Papier2.Location = new System.Drawing.Point(1556, 964);
             this.Papier2.Name = "Papier2";
             this.Papier2.Size = new System.Drawing.Size(22, 13);
@@ -988,7 +988,7 @@
             // Target1
             // 
             this.Target1.BackColor = System.Drawing.Color.Transparent;
-            this.Target1.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.cible;
+            this.Target1.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.cible;
             this.Target1.Location = new System.Drawing.Point(405, 867);
             this.Target1.Name = "Target1";
             this.Target1.Size = new System.Drawing.Size(100, 82);
@@ -1387,7 +1387,7 @@
             // 
             this.table.BackColor = System.Drawing.Color.Transparent;
             this.table.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.table.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.table;
+            this.table.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.table;
             this.table.Location = new System.Drawing.Point(-1, 415);
             this.table.Name = "table";
             this.table.Size = new System.Drawing.Size(100, 83);
@@ -1714,7 +1714,7 @@
             // pictureBox4
             // 
             this.pictureBox4.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox4.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.marteau;
+            this.pictureBox4.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.marteau;
             this.pictureBox4.Location = new System.Drawing.Point(667, 431);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(88, 69);
@@ -1763,7 +1763,7 @@
             // pictureBox2
             // 
             this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox2.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.boite_carton;
+            this.pictureBox2.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.boite_carton;
             this.pictureBox2.Location = new System.Drawing.Point(1122, 358);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(163, 120);
@@ -1774,7 +1774,7 @@
             // pictureBox3
             // 
             this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox3.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.poubelle;
+            this.pictureBox3.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.poubelle;
             this.pictureBox3.Location = new System.Drawing.Point(1458, 279);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(120, 114);
@@ -1785,7 +1785,7 @@
             // Paper1
             // 
             this.Paper1.BackColor = System.Drawing.Color.Transparent;
-            this.Paper1.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Minecraft_paper;
+            this.Paper1.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Minecraft_paper;
             this.Paper1.Location = new System.Drawing.Point(1550, 10);
             this.Paper1.Name = "Paper1";
             this.Paper1.Size = new System.Drawing.Size(31, 24);
@@ -1797,7 +1797,7 @@
             // bocal
             // 
             this.bocal.BackColor = System.Drawing.Color.Transparent;
-            this.bocal.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.Projet_item;
+            this.bocal.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.Projet_item;
             this.bocal.Location = new System.Drawing.Point(-1, 327);
             this.bocal.Name = "bocal";
             this.bocal.Size = new System.Drawing.Size(100, 102);
@@ -1829,7 +1829,7 @@
             // pictureBox6
             // 
             this.pictureBox6.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox6.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.titanic_161614_1280;
+            this.pictureBox6.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.titanic_161614_1280;
             this.pictureBox6.Location = new System.Drawing.Point(1072, 714);
             this.pictureBox6.Name = "pictureBox6";
             this.pictureBox6.Size = new System.Drawing.Size(213, 129);
@@ -1917,7 +1917,7 @@
             // 
             this.player.AccessibleDescription = "";
             this.player.BackColor = System.Drawing.Color.Transparent;
-            this.player.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.profil__2_;
+            this.player.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.profil__2_;
             this.player.Location = new System.Drawing.Point(84, 693);
             this.player.Name = "player";
             this.player.Size = new System.Drawing.Size(90, 62);
@@ -1929,7 +1929,7 @@
             // Nether
             // 
             this.Nether.BackColor = System.Drawing.Color.Transparent;
-            this.Nether.Image = global::Try_To_ESCAPE__GAME.Properties.Resources.MinecraftPortal;
+            this.Nether.Image = global::Try_To_ESCAPE_GAME.Properties.Resources.MinecraftPortal;
             this.Nether.Location = new System.Drawing.Point(267, 654);
             this.Nether.Name = "Nether";
             this.Nether.Size = new System.Drawing.Size(100, 141);

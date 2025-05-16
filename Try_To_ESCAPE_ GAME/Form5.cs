@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
-namespace Try_To_ESCAPE__GAME
+namespace Try_To_ESCAPE_GAME
 {
     public partial class Form5 : Form
     {
