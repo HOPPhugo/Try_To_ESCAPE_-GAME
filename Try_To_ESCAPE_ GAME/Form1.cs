@@ -2246,21 +2246,29 @@ namespace Try_To_ESCAPE_GAME
                 {
                     if (player.Bounds.IntersectsWith(x.Bounds))
                     {
-                        Shiplbl.Location = new Point(1072, 714);
-                        if ( langue == "en"){
-                            Shiplbl.Text = "E : Use";
-                        }
-                        if (langue == "fr")
+                        if (pianocasse == false)
                         {
-                            Shiplbl.Text = "E : Utiliser";
+                            Shiplbl.Location = new Point(1072, 714);
+                            if (langue == "en")
+                            {
+                                Shiplbl.Text = "E : Use";
+                            }
+                            if (langue == "fr")
+                            {
+                                Shiplbl.Text = "E : Utiliser";
+                            }
+                            if (langue == "es")
+                            {
+                                Shiplbl.Text = "E: Utilizar";
+                            }
+                            if (langue == "ar")
+                            {
+                                Shiplbl.Text = "هـ: الاستخدام";
+                            }
                         }
-                        if (langue == "es")
+                        else
                         {
-                            Shiplbl.Text = "E: Utilizar";
-                        }
-                        if (langue == "ar")
-                        {
-                            Shiplbl.Text = "هـ: الاستخدام";
+                            Shiplbl.Text = "";
                         }
                     }
                     else
@@ -3768,7 +3776,7 @@ namespace Try_To_ESCAPE_GAME
 
         private void label11_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void panel98_Paint(object sender, PaintEventArgs e)
@@ -4686,7 +4694,7 @@ namespace Try_To_ESCAPE_GAME
                             if (langue == "fr")
                             {
                                 textUse = "Si vous lisez se message, c'est que vous avez réussi la première épreuve --Casser la cloche--.\n" +
-                                    "Allez parler à ce vieux monsieur, il saura vous aidez pour sortir de ce jeux.\n" +
+                                    "Allez parler à ce vieux monsieur, il saura vous aidez pour sortir de ce jeux (univers crée par le dénomé \"Hugo Schweizer\".\n" +
                                     "Je n'ai qu'un indice pour vous << Les papiers sont la clés >>\n" +
                                     "Ne perdez pas votre temps, surtout pour l'épreuve suivante !";
                                 var result = CustomDialogForm.Show(textUse, langue);
@@ -4694,7 +4702,7 @@ namespace Try_To_ESCAPE_GAME
                             if (langue == "es")
                             {
                                 textUse = "Si estás leyendo este mensaje, es que has superado la primera prueba: romper la campana.\n" +
-                                    "Ve a hablar con este anciano, él podrá ayudarte a salir de este juego.\n" +
+                                    "Ve a hablar con este anciano, él podrá ayudarte a salir de este juego (universo creado por el llamado 'Hugo Schweizer').\n" +
                                     "Sólo tengo una pista para ti <<Los papeles son la clave >>\n" +
                                     "No pierdas el tiempo, ¡sobre todo para el próximo examen!";
                                 var result = CustomDialogForm.Show(textUse, langue);
@@ -4702,7 +4710,7 @@ namespace Try_To_ESCAPE_GAME
                             if (langue == "en")
                             {
                                 textUse = "If you're reading this message, you've passed the first test - Breaking the bell.\n" +
-                                    "Go and talk to this old man, he'll be able to help you get out of this game.\n" +
+                                    "Go and talk to this old man, he'll be able to help you get out of this game (universe created by the so-called 'Hugo Schweizer').\n" +
                                     "I've only got one clue for you << Papers are the key >>\n" +
                                     "Don't waste your time, especially for the next test!";
                                 var result = CustomDialogForm.Show(textUse, langue);
@@ -4710,7 +4718,7 @@ namespace Try_To_ESCAPE_GAME
                             if (langue == "ar")
                             {
                                 textUse = "إذا كنت تقرأ هذه الرسالة ، فهذا يعني أنك نجحت في الاختبار الأول - كسر الجرس\n" +
-                                    "اذهب وتحدث إلى هذا الرجل العجوز، سيكون قادرًا على مساعدتك في الخروج من هذه اللعبة\n" +
+                                    "اذهب للحديث مع ذلك الرجل العجوز، فهو سيعرف كيف يساعدك للخروج من هذه اللعبة (العالم الذي أنشأه المدعو \"هوجو شفايتزر\")\n" +
                                     "لدي تلميح واحد فقط لك <<الأوراق هي المفتاح\n" +
                                     "لا تضيع وقتك، خاصة في الاختبار التالي";
                                 var result = CustomDialogForm.Show(textUse, langue);

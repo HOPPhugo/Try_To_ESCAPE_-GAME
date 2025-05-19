@@ -1089,7 +1089,7 @@ namespace Try_To_ESCAPE_GAME
                     stopRun();
                     if (langue == "fr")
                     {
-                        textUse = "Qu'est ce que L'hippopotomonstrosesquippedaliophobie \n\n Y = La peure des monstres \n N = La peure des animaux géants \n C = La peure des mots longs  \n  QUIZ  --  LE SORCIER FOU !";
+                        textUse = "Qu'est ce que L'hippopotomonstrosesquippedaliophobie \n\n Y = La peure des monstres \n N = La peure des animaux géants \n C = La peure des mots longs";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1122,7 +1122,7 @@ namespace Try_To_ESCAPE_GAME
                     }
                     if (langue == "es")
                     {
-                        textUse = "¿Qué es la hipopotomonstrosesquippedaliofobia? \n\n Y = El miedo a los monstruos \n N = El miedo a los animales gigantes \n C = El miedo a las palabras largas \n QUIZ  ---  ¡EL MAGO LOCO! ";
+                        textUse = "¿Qué es la hipopotomonstrosesquippedaliofobia? \n\n Y = El miedo a los monstruos \n N = El miedo a los animales gigantes \n C = El miedo a las palabras largas";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1155,7 +1155,7 @@ namespace Try_To_ESCAPE_GAME
                     }
                     if (langue == "en")
                     {
-                        textUse = "What is hippopotomonstrosesquippedaliophobia? \n\n Y = The fear of monsters \n N = The fear of giant animals \n C = The fear of long words \n QUIZ  --- THE MAD WIZZARD!";
+                        textUse = "What is hippopotomonstrosesquippedaliophobia? \n\n Y = The fear of monsters \n N = The fear of giant animals \n C = The fear of long words";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1188,7 +1188,7 @@ namespace Try_To_ESCAPE_GAME
                     }
                     if (langue == "ar")
                     {
-                        textUse = "ما هو رهاب فرس النهر؟ \n\n Y = الخوف من الوحوش \n N = الخوف من الحيوانات العملاقة \n C = الخوف من الكلمات الطويلة \n مسابقة --- الساحر المجنون";
+                        textUse = "ما هو رهاب فرس النهر؟ \n\n Y = الخوف من الوحوش \n N = الخوف من الحيوانات العملاقة \n C = الخوف من الكلمات الطويلة";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1227,7 +1227,7 @@ namespace Try_To_ESCAPE_GAME
                     { 
                         textUse = "Quiz 2 :";
                         var r = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Hawaï appartient à quel pays ? \n\n Y = États-Unis \n N = Amérique du sud \n C = Asie \n QUIZ  --  LE SORCIER FOU !";
+                        textUse = "Hawaï appartient à quel pays ? \n\n Y = États-Unis \n N = Amérique du sud \n C = Asie";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1261,7 +1261,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Cuestionario 2:";
                         var res = CustomDialogForm.Show(textUse, langue);
-                        textUse = "¿A qué país pertenece Hawai? \n\n Y = Estados Unidos \n N = América del Sur \n C = Asia \n QUIZ  --  ¡EL HECHICERO LOCO!";
+                        textUse = "¿A qué país pertenece Hawai? \n\n Y = Estados Unidos \n N = América del Sur \n C = Asia";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1295,7 +1295,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 2:";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Which country does Hawaii belong to? \n\n Y = United States \n N = Amérique du sud \n C = Asia \n QUIZ  --  THE MAD WIZZARD!";
+                        textUse = "Which country does Hawaii belong to? \n\n Y = United States \n N = Amérique du sud \n C = Asia";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1329,7 +1329,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = ": السؤال 2";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "إلى أي دولة تنتمي هاواي؟ \n\n Y = الولايات المتحدة الأمريكية \n N = أمريكا الجنوبية \n C = آسيا \n مسابقة --- الساحر المجنون ";
+                        textUse = "إلى أي دولة تنتمي هاواي؟ \n\n Y = الولايات المتحدة الأمريكية \n N = أمريكا الجنوبية \n C = آسيا";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1366,7 +1366,7 @@ namespace Try_To_ESCAPE_GAME
                     if (langue == "fr"){
                         textUse = "Quiz 3 : ";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Quelle est la planète la plus proche du soleil ? \n\n Y = Mars \n N = Terre \n C = Mercure \nQUIZ  --  LE SORCIER FOU !";
+                        textUse = "Quelle est la planète la plus proche du soleil ? \n\n Y = Mars \n N = Terre \n C = Mercure";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1400,7 +1400,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 3:";
                         var s = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Which planet is closest to the sun? \n\n Y = March \n N = Earth \n C = Mercure \nQUIZ  --  THE MAD WIZZARD!";
+                        textUse = "Which planet is closest to the sun? \n\n Y = March \n N = Earth \n C = Mercure";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1434,7 +1434,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 3 :";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "¿Qué planeta está más cerca del Sol? \n\n Y = Marzo \n N = Tierra \n C = Mercure \nQUIZ -- ¡EL MAGO LOCO!";
+                        textUse = "¿Qué planeta está más cerca del Sol? \n\n Y = Marzo \n N = Tierra \n C = Mercure";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1468,7 +1468,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = ":الاختبار 3";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "ما الكوكب الأقرب إلى الشمس؟ \n\n Y = مارس \n N = الأرض \n C = ميركيور \nمسابقة - الساحر المجنون";
+                        textUse = "ما الكوكب الأقرب إلى الشمس؟ \n\n Y = مارس \n N = الأرض \n C = ميركيور ";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1506,7 +1506,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 4 :";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Où se trouve l’hypothalamus dans le corps humain? \n\n Y = Dans les yeux \n N = Dans le cerveau \n C = Dabs l'estomac \nQUIZ  --  LE SORCIER FOU !";
+                        textUse = "Où se trouve l’hypothalamus dans le corps humain? \n\n Y = Dans les yeux \n N = Dans le cerveau \n C = Dabs l'estomac";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1540,7 +1540,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 4:";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Where is the hypothalamus located in the human body? \n\n Y = In the eyes \n N = In the brain \n A = In the stomach \nQUIZ  --  THE MAD WIZZARD!";
+                        textUse = "Where is the hypothalamus located in the human body? \n\n Y = In the eyes \n N = In the brain \n A = In the stomach";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1574,7 +1574,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Cuestionario 4:";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "¿Dónde se encuentra el hipotálamo en el cuerpo humano? \n\n Y = En los ojos \n N = En el cerebro \n C = En el estómago \nQUIZ -- ¡EL MAGO LOCO!";
+                        textUse = "¿Dónde se encuentra el hipotálamo en el cuerpo humano? \n\n Y = En los ojos \n N = En el cerebro \n C = En el estómago";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1608,7 +1608,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = ":الاختبار 4";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "أين يقع الوطاء في جسم الإنسان؟ \n\n Y = في العيون \n N = في الدماغ \n C = في المعدة \nمسابقة - الساحر المجنون";
+                        textUse = "أين يقع الوطاء في جسم الإنسان؟ \n\n Y = في العيون \n N = في الدماغ \n C = في المعدة ";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1645,7 +1645,7 @@ namespace Try_To_ESCAPE_GAME
                     if (langue == "fr"){
                         textUse = "Quiz 5 :";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Quel est le plus grand lac entièrement en Suisse ? \n\n Y = Lac de Zurich \n N =  Lac de Neuchâtel\n C = Lac Léman \nQUIZ  --  LE SORCIER FOU !";
+                        textUse = "Quel est le plus grand lac entièrement en Suisse ? \n\n Y = Lac de Zurich \n N =  Lac de Neuchâtel\n C = Lac Léman";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1679,7 +1679,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Cuestionario 5 :";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "¿Cuál es el lago más grande de Suiza? \n\n Y = Lago de Zúrich \n N =  Lago de Neuchâtel\n C = Lago Lemán \nQUIZ -- ¡EL MAGO LOCO!";
+                        textUse = "¿Cuál es el lago más grande de Suiza? \n\n Y = Lago de Zúrich \n N =  Lago de Neuchâtel\n C = Lago Lemán";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1713,7 +1713,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 5:";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Which is the largest lake entirely in Switzerland? \n\n Y = Lake Zurich \n N =  Lake Neuchâtel\n C = Lake Leman \nQUIZ  --  THE MAD WIZZARD!";
+                        textUse = "Which is the largest lake entirely in Switzerland? \n\n Y = Lake Zurich \n N =  Lake Neuchâtel\n C = Lake Leman";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1747,7 +1747,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = ":الاختبار 5";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "ما هي أكبر بحيرة في سويسرا؟ \n\n Y = بحيرة زيورخ \n N =  بحيرة نوشاتيل\n C = بحيرة جنيف \nمسابقة - الساحر المجنون";
+                        textUse = "ما هي أكبر بحيرة في سويسرا؟ \n\n Y = بحيرة زيورخ \n N =  بحيرة نوشاتيل\n C = بحيرة جنيف ";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1784,7 +1784,7 @@ namespace Try_To_ESCAPE_GAME
                     if (langue == "fr"){
                         textUse = "Quiz 6 :";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Dans quelle ville se déroule l’action principale de Les Trois Mousquetaires ? \n\n Y = Paris \n N =  Londres\n C = Bordeaux \nQUIZ  --  LE SORCIER FOU !";
+                        textUse = "Dans quelle ville se déroule l’action principale de Les Trois Mousquetaires ? \n\n Y = Paris \n N =  Londres\n C = Bordeaux";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1818,7 +1818,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Cuestionario 6 :";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "¿En qué ciudad transcurre la acción principal de Los tres mosqueteros? \n\n Y = París \n N =  Londres\n C = Burdeos \nQUIZ -- ¡EL MAGO LOCO!";
+                        textUse = "¿En qué ciudad transcurre la acción principal de Los tres mosqueteros? \n\n Y = París \n N =  Londres\n C = Burdeos";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1852,7 +1852,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 6 :";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "In which city does the main action of The Three Musketeers take place? \n\n Y = Paris \n N =  London\n C = Bordeaux \nQUIZ -- THE MAD WIZARD!";
+                        textUse = "In which city does the main action of The Three Musketeers take place? \n\n Y = Paris \n N =  London\n C = Bordeaux";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1886,7 +1886,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "الاختبار 6 :";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "في أي مدينة تدور الأحداث الرئيسية لفيلم الفرسان الثلاثة؟ \n\n Y = باريس \n N =  لندن\n C = بوردو \nمسابقة - الساحر المجنون";
+                        textUse = "في أي مدينة تدور الأحداث الرئيسية لفيلم الفرسان الثلاثة؟ \n\n Y = باريس \n N =  لندن\n C = بوردو ";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1923,7 +1923,7 @@ namespace Try_To_ESCAPE_GAME
                     if (langue == "fr"){
                         textUse = "Quiz 7 :";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Quel film a remporté la Palme d’Or au Festival de Cannes 2024 ? \n\n Y = The Substance de Coralie Fargeat \n N = La Plus Précieuse des marchandises de Michel Hazanavicius\n C = Anora de Sean Baker \nQUIZ  --  LE SORCIER FOU !";
+                        textUse = "Quel film a remporté la Palme d’Or au Festival de Cannes 2024 ? \n\n Y = The Substance de Coralie Fargeat \n N = La Plus Précieuse des marchandises de Michel Hazanavicius\n C = Anora de Sean Baker";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1957,7 +1957,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Cuestionario 7 :";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "¿Qué película ganó la Palma de Oro en el Festival de Cannes 2024? \n\n Y = La sustancia de Coralie Fargeat \n N = La mercancía más preciada de Michel Hazanavicius\n C = Anora de Sean Baker \nQUIZ -- ¡EL MAGO LOCO!";
+                        textUse = "¿Qué película ganó la Palma de Oro en el Festival de Cannes 2024? \n\n Y = La sustancia de Coralie Fargeat \n N = La mercancía más preciada de Michel Hazanavicius\n C = Anora de Sean Baker";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -1991,7 +1991,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = "Quiz 7:";
                         var w = CustomDialogForm.Show(textUse, langue);
-                        textUse = "Which film won the Palme d'Or at Cannes 2024? \n\n Y = The Substance by Coralie Fargeat \n N = The Most Precious Commodity by Michel Hazanavicius\n C = Anora by Sean Baker \nQUIZ  --  THE MAD WIZZARD!";
+                        textUse = "Which film won the Palme d'Or at Cannes 2024? \n\n Y = The Substance by Coralie Fargeat \n N = The Most Precious Commodity by Michel Hazanavicius\n C = Anora by Sean Baker";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
@@ -2025,7 +2025,7 @@ namespace Try_To_ESCAPE_GAME
                     {
                         textUse = ":الاختبار 7";
                         var a = CustomDialogForm.Show(textUse, langue);
-                        textUse = "أي فيلم فاز بالسعفة الذهبية في مهرجان كان 2024؟ \n\n Y = المادة بقلم كورالي فارجيت \n N = أثمن سلعة ثمينة لميشيل هازانافيتشيوس\n C = أنورا من شون بيكر \nمسابقة - الساحر المجنون";
+                        textUse = "أي فيلم فاز بالسعفة الذهبية في مهرجان كان 2024؟ \n\n Y = المادة بقلم كورالي فارجيت \n N = أثمن سلعة ثمينة لميشيل هازانافيتشيوس\n C = أنورا من شون بيكر";
                         var result = CustomDialogForm2.Show(textUse, langue);
                         if (result == DialogResult.Yes)
                         {
