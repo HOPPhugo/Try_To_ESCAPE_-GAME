@@ -1,3 +1,1 @@
-For play the game you must launch the .sln file and then launch de code. 
-
-You can't just launch the .exe before launched the .sln file.
+Fore play this game, you have to download the release on the TryToEscape! page on the middle right and download "game" file.

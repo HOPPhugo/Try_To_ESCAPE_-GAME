@@ -2,8 +2,8 @@
 Nom du projet : TryToEscape!
 Auteur : Hugo Schweizer
 Date de création : Lundi 10 Mars 2025
-Dernière mise à jour : Mardi 29 avril 2025
-Langage : C# Windows Form.NET Framework 4.7.2
+Dernière mise à jour : mardi 27 mai 2025
+Language : C# Windows Form.NET Framework 4.7.2
 Description : On apprait dans un monde encore inconnu, nous serons affronter à pusieur énigmes, toutes différentes les unes que les autes ! Arriverez-vous à vous en sortir ?
 */
 //stoprun == Fonction qui nous empêche de marcher 

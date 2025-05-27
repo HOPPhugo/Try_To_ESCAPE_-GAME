@@ -2,8 +2,8 @@
 Nom du projet : TryToEscape!
 Auteur : Hugo Schweizer
 Date de création : Lundi 10 Mars 2025
-Dernière mise à jour : Mardi 29 avril 2025
-Langage : C# Windows Form.NET Framework 4.7.2
+Dernière mise à jour : mardi 27 mai 2025
+Language : C# Windows Form.NET Framework 4.7.2
 Description : On apprait dans un monde encore inconnu, nous serons affronter à pusieur énigmes, toutes différentes les unes que les autes ! Arriverez-vous à vous en sortir ?
 */
 //stoprun == Fonction qui nous empêche de marcher 
@@ -32,109 +32,122 @@ namespace Try_To_ESCAPE_GAME
 {
     public partial class Form1 : Form
     {
-        int speed = 12; // vitesse de marche
-        string marcher = "gauche"; // quel endroit on est pour l'animation de la porte ( quand il y a l'animation de prends cette données pour savoir de quel sense je fait bouger le panel12).
-        int rage = 0; // si on parle trop au premier PNJ sans avoir lu la feuille au début le jeu se ferm (à chque fois qu'on lui parle sans avoir lu la fauille "rage" s'incrémente puis s'il atteint trois, le jeu se ferm).
-        bool menu = false; // false quand le "menu" est fermé / true si le "menu" est ouvert ( utilisé pour quand le "menu" est ouvert "true" le le timer s'arrête "Timer : Pause").
-        int papier = 0; // le nombre de papier ramassé ( s'incrémente à chaque fois qu'on ramasse un papier).
-        bool monde2 = false; // false == le personnage est dans le monde 1 / true == le personnage est dans le monde 2. ( quand on a fini se monde avant d'être t'éléporter, monde2 devient true).
-        int cibles = 0; // Cibles s'incrémente quand on clique sur une cilbes qui s'appelle "Target1" ( si "cibles" atteint 12 et +, la cible dissparait et le portail pour l'autre monde apparait).
-        bool timer = false; // False == timer est pas activé / true == timer est activé.
-        string langue = "fr"; // fr == français, es == espagnole, en == english, ar == arabe. ("langue" change selon le language choisi dans le menu).
-        bool bouton1 = false; // si on intéragi sur le "button1" dans la deuxième salle, button1 devient true
-        bool bouton2 = false;// si on intéragi sur le "bouton2" dans la deuxième salle, bouton2 devient true
-        bool portal = true; // si on prends le portail, il devient false.
-        double time = 0; 
-        bool correct = false; //si on à juste à la première question du PNJ, il devient true
-        bool start = false; // si start est égale à true et que le joueur intéragi avec le bateau, le jeu bataille navale se lance.
-        bool piano = false; // si on réussi l'épreuve du piano, il devient true
-        bool bouton3 = false; // si on intéragi sur le "bouton3" dans la deuxième salle, bouton3 devient true
-        bool bouton4 = false;// si on intéragi sur le "bouton4" dans la deuxième salle, bouton4 devient true
-        bool chargement = true; // au début du jeu, il y à un écran de démarrage qui explique comment ouvrir le menu et demande de cliquer pour lancer le jeu. Quand on clique, il disparrait et chargement devient false (le timer ne peut pas se lancer tant que chargement est true
-        string Sound = ""; // quand on appuie sur une des touches du piano, sound devient le nom de la touche. (sa sert à vérifier si on appuie sur les touches dansle bonne ordre).
-        bool texto = false; // selon si texto est false/true, un texte différent s'affiche quand on parle au pnj (c'est pour changer entre le texte de la première épreuve et la deixième)
-        bool épreuve2 = false; // false si on à pas réussi la deuxième épreuve / true si on a réussi la deuxième épreuve.
-        bool soulé = false; // soulé devien true si il doit fermer le jeu après lui avoir parler trop de fois.
-        bool pays = false; // false si on a pas encore réussi l'épreuve des pays / true si on l'a réussie.
-        bool juste = true; // true si on n'a pas eu faux plus d'une fois / false si on à eu faux plus d'une foix
-        bool salle2 = false; // false si on a pas accès à la salle 2 / true si on y a accès
-        bool cool = false; // false si on peut encore vérifier si le fichier "Victoire.txt" exist / true si on ne peut plus.
-        bool connaissances = false; // false si on a pas lu la feuille / true si on l'a lue
-        bool move = true; // false si on ne peut bouger / true si on peut bouger
-        bool Marteau = false; // false si on ne possède pas le marteau / true si on le possède
-        bool parler = false; // false si on peut pas parler au pnj / true si on peut
-        int rage2 = 0; // il y a deux moments ou il y a la rage, il fonctionne comme "rage"
-        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // récupère le chemin d'accès de mon jeu ( je l'utilise pour crée et trouver les fichier pour les events)
-        bool interact = false; // false si E n'est pas pressé / true si E est pressé
-        int sleep = 0; // force a appuyer deux fois sur le bocal après l'avoir cassé
-        bool bocalcassé = false; // false si le bocal est intacte / true si il est cassé
-        bool question1 = false; // false si on n'a pas encor juste à la question 1 / true si on a juste
-        bool labelmr = true; // false le label du marteau n'est pas visible / si true il est visible
-        bool labelcl = true;// false le label du bocal n'est pas visible / si true il est visible
-        bool moveLeft, moveRight, moveUp, moveDown; // initialisation des mouvements du personnage.
-        string textUse; // variable contenant le texte pour le "CustomMessageBox"
-        bool pianocasse = false;
-        
-        // le custom messagebox est une alternative au messagebox de VisualStudio, car ceux de vs ne peuvent être modifier outre du texte, donc j'ai fait ces "CustomMessageBox" pour povoir modifier l0'image de fond et les boutons.
+        int speed = 12; // Vitesse de marche.
+        string marcher = "gauche"; // Côté où se trouve le personnage pour l'animation de la porte (cette donnée est utilisée pour savoir dans quel sens faire bouger le panel12 lors de l'animation).
+        int rage = 0; // Si on parle trop au premier PNJ sans avoir lu la feuille au début, le jeu se ferme (à chaque fois qu'on lui parle sans avoir lu la feuille, "rage" s'incrémente ; s'il atteint trois, le jeu se ferme).
+        bool menu = false; // false quand le menu est fermé / true quand le menu est ouvert (utilisé pour mettre le timer en pause quand le menu est ouvert).
+        int papier = 0; // Nombre de papiers ramassés (s'incrémente à chaque fois qu'on en ramasse un).
+        bool monde2 = false; // false == le personnage est dans le monde 1 / true == le personnage est dans le monde 2 (quand on a fini ce monde, monde2 devient true avant la téléportation).
+        int cibles = 0; // S'incrémente quand on clique sur une cible nommée "Target1" (si "cibles" atteint 12 ou plus, la cible disparaît et le portail vers l'autre monde apparaît).
+        bool timer = false; // false == le timer n'est pas activé / true == le timer est activé.
+        string langue = "fr"; // fr == français, es == espagnol, en == anglais, ar == arabe (change selon la langue choisie dans le menu).
+        bool bouton1 = false; // Devient true si on interagit avec le "bouton1" dans la deuxième salle.
+        bool bouton2 = false; // Devient true si on interagit avec le "bouton2" dans la deuxième salle.
+        bool portal = true; // Devient false si on prend le portail.
+        double time = 0;
+        bool correct = false; // Devient true si on répond juste à la première question du PNJ.
+        bool start = false; // Si "start" est true et que le joueur interagit avec le bateau, le jeu de bataille navale se lance.
+        bool piano = false; // Devient true si on réussit l'épreuve du piano.
+        bool bouton3 = false; // Devient true si on interagit avec le "bouton3" dans la deuxième salle.
+        bool bouton4 = false; // Devient true si on interagit avec le "bouton4" dans la deuxième salle.
+        bool chargement = true; // Au début du jeu, un écran explique comment ouvrir le menu et demande de cliquer pour lancer le jeu. Quand on clique, il disparaît et "chargement" devient false (le timer ne peut pas se lancer tant que "chargement" est true).
+        string Sound = ""; // Quand on appuie sur une des touches du piano, "Sound" devient le nom de la touche (sert à vérifier si on appuie sur les touches dans le bon ordre).
+        bool texto = false; // Selon la valeur de "texto", un texte différent s'affiche quand on parle au PNJ (sert à alterner entre le texte de la première et de la deuxième épreuve).
+        bool épreuve2 = false; // false si on n'a pas réussi la deuxième épreuve / true si on l'a réussie.
+        bool soulé = false; // Devient true si le jeu doit se fermer après avoir trop parlé au PNJ.
+        bool pays = false; // false si on n'a pas encore réussi l'épreuve des pays / true si on l’a réussie.
+        bool juste = true; // true si on n’a pas eu plus d’une erreur / false si on a eu plus d’une erreur.
+        bool salle2 = false; // false si on n’a pas accès à la salle 2 / true si on y a accès.
+        bool cool = false; // false si on peut encore vérifier si le fichier "Victoire.txt" existe / true si ce n’est plus possible.
+        bool connaissances = false; // false si on n’a pas lu la feuille / true si on l’a lue.
+        bool move = true; // false si on ne peut pas bouger / true si on peut bouger.
+        bool Marteau = false; // false si on ne possède pas le marteau / true si on le possède.
+        bool parler = false; // false si on ne peut pas parler au PNJ / true si on peut.
+        int rage2 = 0; // Deuxième compteur de rage, fonctionne comme "rage".
+        string path = AppDomain.CurrentDomain.BaseDirectory + @"\games"; // Récupère le chemin d’accès du jeu (utilisé pour créer et trouver les fichiers liés aux événements).
+        bool interact = false; // false si E n’est pas pressée / true si E est pressée.
+        int sleep = 0; // Force à appuyer deux fois sur le bocal après l’avoir cassé.
+        bool bocalcassé = false; // false si le bocal est intact / true s’il est cassé.
+        bool question1 = false; // false si on n’a pas encore répondu juste à la question 1 / true si on a répondu juste.
+        bool labelmr = true; // false si le label du marteau n’est pas visible / true s’il est visible.
+        bool labelcl = true; // false si le label du bocal n’est pas visible / true s’il est visible.
+        bool moveLeft, moveRight, moveUp, moveDown; // Initialisation des mouvements du personnage.
+        string textUse; // Texte affiché dans le "CustomMessageBox".
+        bool pianocasse = false; // false si le piano fonctionne / true s’il est cassé.
+        SoundPlayer Do = new SoundPlayer(Properties.Resources.Do); // Instancie le son "DO".
+        SoundPlayer Re = new SoundPlayer(Properties.Resources.Do); // Instancie le son "Re".
+        SoundPlayer Mi = new SoundPlayer(Properties.Resources.Do); // Instancie le son "Mi".
+        SoundPlayer Fa = new SoundPlayer(Properties.Resources.Do); // Instancie le son "Fa".
+        SoundPlayer Sol = new SoundPlayer(Properties.Resources.Do); // Instancie le son "Sol".
+        SoundPlayer La = new SoundPlayer(Properties.Resources.Do); // Instancie le son "La".
+        SoundPlayer Si = new SoundPlayer(Properties.Resources.Do); // Instancie le son "Si".
+        SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda); // Instancie le son "Zelda".
+        SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__6_); // Instancie le son "chadi".
+
+
+        // Le CustomMessageBox est une alternative au MessageBox de Visual Studio,
+        // car ceux de VS ne peuvent être modifiés au-delà du texte.
+        // J’ai donc créé ce "CustomMessageBox" pour pouvoir modifier l’image de fond et les boutons.
         public Form1()
         {
             InitializeComponent();
-            epreuve(); // appelle la fonction pour les épreuves
-            spawn(); // permet de nous faire apparraître au point de départ
-            Form5 frm = new Form5(); // ouvre le form5 (le timer)
+            epreuve(); // Appelle la fonction pour les épreuves.
+            spawn(); // Permet de faire apparaître le joueur au point de départ.
+            Form5 frm = new Form5(); // Ouvre le Form5 (le timer).
             frm.Show();
-            panel12.GetType().InvokeMember("DoubleBuffered", // permet de rendre plus fluide le jeu.
-            System.Reflection.BindingFlags.NonPublic |
-            System.Reflection.BindingFlags.Instance |
-            System.Reflection.BindingFlags.SetProperty,
-            null, panel12, new object[] { true });
+            panel12.GetType().InvokeMember("DoubleBuffered", // Permet de rendre le jeu plus fluide.
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.SetProperty,
+                null, panel12, new object[] { true });
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
-        public partial class CustomDialogForm : Form //cération d'un messagebox customisable
+
+        public partial class CustomDialogForm : Form // Création d’un MessageBox personnalisable
         {
-            // Cache statique pour l'image de fond
+            // Cache statique pour l’image de fond.
             private static Image backgroundImageCache;
 
-            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            // Cache pour les tailles de texte précalculées (optimisation du rendu du texte).
             private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
 
-            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
+            // Cache pour les polices (évite de créer plusieurs fois les mêmes polices).
             private static Font labelFont;
 
             public DialogResult Result { get; private set; }
-            private string _Text; // variable pour garder les données de "textUse" et les réutiliser dans CustomDialogForm
-            private string _langue;// variable pour garder les données de "langue" et les réutiliser dans CustomDialogForm
+            private string _Text; // Variable pour garder les données de "textUse" et les réutiliser dans CustomDialogForm.
+            private string _langue; // Variable pour garder les données de "langue" et les réutiliser dans CustomDialogForm.
 
             static CustomDialogForm()
             {
-                // Initialisation des ressources statiques
+                // Initialisation des ressources statiques.
                 labelFont = new Font("Segoe UI", 10);
             }
 
-            // Méthode statique pour précharger l'image et initialiser les ressources
+            // Méthode statique pour précharger l’image et initialiser les ressources.
             public static void PreloadResources()
             {
                 if (backgroundImageCache == null)
                 {
-                    // Charge l'image en mémoire une seule fois
+                    // Charge l’image en mémoire une seule fois.
                     backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
                 }
             }
 
-            // Méthode optimisée pour calculer la taille du texte (avec mise en cache)
+            // Méthode optimisée pour calculer la taille du texte (avec mise en cache).
             private static Size GetTextSize(string text, int maxWidth)
             {
                 string cacheKey = text + "_" + maxWidth.ToString();
 
-                // Utilise la taille mise en cache si disponible
+                // Utilise la taille mise en cache si disponible.
                 if (textSizeCache.ContainsKey(cacheKey))
                     return textSizeCache[cacheKey];
 
-                // Calcule et met en cache la taille pour les prochaines utilisations
+                // Calcule et met en cache la taille pour les prochaines utilisations.
                 Size textSize;
                 using (Bitmap dummyBitmap = new Bitmap(1, 1))
                 using (Graphics g = Graphics.FromImage(dummyBitmap))
@@ -142,10 +155,10 @@ namespace Try_To_ESCAPE_GAME
                     textSize = TextRenderer.MeasureText(g, text, labelFont, new Size(maxWidth, 0), TextFormatFlags.WordBreak);
                 }
 
-                // Stocke dans le cache (limite la taille du cache à 100 entrées)
+                // Stocke dans le cache (limite la taille du cache à 100 entrées).
                 if (textSizeCache.Count > 100)
                 {
-                    // Simple stratégie : vide le cache s'il devient trop grand
+                    // Simple stratégie : vide le cache s’il devient trop grand.
                     textSizeCache.Clear();
                 }
                 textSizeCache[cacheKey] = textSize;
@@ -155,7 +168,7 @@ namespace Try_To_ESCAPE_GAME
 
             public CustomDialogForm(string text, string langue)
             {
-                // Configuration initiale avec double buffering pour éviter les scintillements
+                // Configuration initiale avec double buffering pour éviter les scintillements.
                 this.SetStyle(ControlStyles.OptimizedDoubleBuffer |
                               ControlStyles.AllPaintingInWmPaint |
                               ControlStyles.UserPaint,
@@ -166,7 +179,7 @@ namespace Try_To_ESCAPE_GAME
                 this.StartPosition = FormStartPosition.CenterParent;
                 this.BackgroundImageLayout = ImageLayout.Stretch;
 
-                // Utilise l'image du cache
+                // Utilise l’image du cache.
                 if (backgroundImageCache == null)
                     backgroundImageCache = Properties.Resources.pixil_frame_0__6_;
 
@@ -175,21 +188,21 @@ namespace Try_To_ESCAPE_GAME
                 _Text = text;
                 _langue = langue;
 
-                // Constantes pour le layout
+                // Constantes pour le layout.
                 const int maxWidth = 400;
                 const int padding = 20;
 
-                // Utilise la fonction optimisée pour calculer la taille du texte
+                // Utilise la fonction optimisée pour calculer la taille du texte.
                 Size textSizes = GetTextSize(_Text, maxWidth);
 
-                // Calcul optimisé des dimensions
+                // Calcul optimisé des dimensions.
                 int formWidth = textSizes.Width + 2 * padding;
-                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur du bouton
 
-                // Définit la taille du formulaire immédiatement
+                // Définit la taille du formulaire immédiatement.
                 this.ClientSize = new Size(formWidth, formHeight);
 
-                // Création du label avec les dimensions précalculées
+                // Création du label avec les dimensions précalculées.
                 Label lblMessage = new Label
                 {
                     Text = _Text,
@@ -200,9 +213,8 @@ namespace Try_To_ESCAPE_GAME
                     TextAlign = ContentAlignment.MiddleCenter,
                     Font = labelFont,
                     ForeColor = Color.Black,
-                    UseMnemonic = false // Optimisation: désactive le traitement des mnémoniques (&)
+                    UseMnemonic = false // Optimisation : désactive le traitement des mnémoniques (&)
                 };
-
                 // Création du bouton (optimisée)
                 Button btnOK = new Button
                 {
@@ -214,10 +226,11 @@ namespace Try_To_ESCAPE_GAME
                     ForeColor = Color.Black,
                     FlatStyle = FlatStyle.Flat,
                     FlatAppearance = { BorderSize = 0 },
-                    Text = GetButtonText(langue)
+                    Text = GetButtonText(langue) // Détermine le texte selon la langue
                 };
                 int newSize = 12;
-                // Délégués pré-alloués pour éviter les créations multiples
+
+                // Délégués pré-alloués pour éviter des créations multiples
                 lblMessage.MouseMove += (s, e) => lblMessage.ForeColor = Color.Blue;
                 lblMessage.MouseLeave += (s, e) => lblMessage.ForeColor = Color.Black;
                 btnOK.MouseMove += (s, e) => btnOK.Font = new Font(btnOK.Font.FontFamily, newSize);
@@ -227,32 +240,32 @@ namespace Try_To_ESCAPE_GAME
                 this.Controls.AddRange(new Control[] { lblMessage, btnOK });
                 this.AcceptButton = btnOK;
 
-
                 this.ResumeLayout(false);
             }
 
-            // Méthode helper pour déterminer le texte du bouton selon la langue
+            // Méthode utilitaire pour déterminer le texte du bouton selon la langue
             private string GetButtonText(string langue)
             {
                 switch (langue.ToLowerInvariant())
                 {
                     case "es": return "De acuerdo";
                     case "ar": return "موافق";
-                    default: return "OK"; // fr, en, etc.
+                    default: return "OK"; // Valeur par défaut pour "fr", "en", etc.
                 }
             }
 
-            // Optimisation: évite les redessins inutiles
+            // Optimisation : évite les redessins inutiles
             protected override CreateParams CreateParams
             {
                 get
                 {
                     CreateParams cp = base.CreateParams;
-                    cp.ExStyle |= 0x02000000;
+                    cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED pour un rendu plus fluide
                     return cp;
                 }
             }
 
+            // Affiche la boîte de dialogue de manière synchrone
             public static DialogResult Show(string text, string langue)
             {
                 // Précharge les ressources si nécessaire
@@ -264,13 +277,13 @@ namespace Try_To_ESCAPE_GAME
                 }
             }
 
-            // Version asynchrone préférée pour ne pas bloquer l'interface
+            // Version asynchrone recommandée pour ne pas bloquer l’interface utilisateur
             public static async Task<DialogResult> ShowAsync(string text, string langue)
             {
                 // Précharge les ressources de manière asynchrone
                 await Task.Run(() => EnsureResourcesLoaded());
 
-                // Optimisation: précalcule la taille du texte en arrière-plan
+                // Optimisation : précalcule la taille du texte en arrière-plan
                 await Task.Run(() => GetTextSize(text, 400));
 
                 // Utilise TaskCompletionSource pour exécuter ShowDialog de manière asynchrone
@@ -291,7 +304,7 @@ namespace Try_To_ESCAPE_GAME
                 }
                 else
                 {
-                    // Fallback si aucun formulaire principal n'est disponible
+                    // Solution de repli si aucun formulaire principal n'est disponible
                     await Task.Run(() =>
                     {
                         using (CustomDialogForm form = new CustomDialogForm(text, langue))
@@ -305,6 +318,7 @@ namespace Try_To_ESCAPE_GAME
                 return await tcs.Task;
             }
 
+
             // S'assure que toutes les ressources sont chargées
             private static void EnsureResourcesLoaded()
             {
@@ -315,12 +329,12 @@ namespace Try_To_ESCAPE_GAME
                     labelFont = new Font("Segoe UI", 10);
             }
         }
-        public partial class CustomDialogForm3: Form
+        public partial class CustomDialogForm3 : Form
         {
             // Cache statique pour l'image de fond
             private static Image backgroundImageCache;
 
-            // Cache pour les tailles de texte précalculées (optimisation du rendu de texte)
+            // Cache pour les tailles de texte pré-calculées (optimisation du rendu de texte)
             private static Dictionary<string, Size> textSizeCache = new Dictionary<string, Size>();
 
             // Cache pour les polices (évite de créer plusieurs fois les mêmes polices)
@@ -366,7 +380,7 @@ namespace Try_To_ESCAPE_GAME
                 // Stocke dans le cache (limite la taille du cache à 100 entrées)
                 if (textSizeCache.Count > 100)
                 {
-                    // Simple stratégie : vide le cache s'il devient trop grand
+                    // Stratégie simple : vide le cache s'il devient trop grand
                     textSizeCache.Clear();
                 }
                 textSizeCache[cacheKey] = textSize;
@@ -403,9 +417,10 @@ namespace Try_To_ESCAPE_GAME
                 // Utilise la fonction optimisée pour calculer la taille du texte
                 Size textSizes = GetTextSize(_Text, maxWidth);
                 this.MinimumSize = new System.Drawing.Size(170, 20);
+
                 // Calcul optimisé des dimensions
                 int formWidth = textSizes.Width + 2 * padding;
-                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur bouton
+                int formHeight = textSizes.Height + 30 + 3 * padding; // 30 = hauteur du bouton
 
                 // Définit la taille du formulaire immédiatement
                 this.ClientSize = new Size(formWidth, formHeight);
@@ -2686,7 +2701,6 @@ namespace Try_To_ESCAPE_GAME
         {
             if (Sound == "Si" || Sound == "") // si la dernière note était "si" ou rien
             {
-                SoundPlayer Do = new SoundPlayer(Properties.Resources.Do);
                 Do.Play(); // fait le son "do"
                 if (Sound == "Si")
                 {
@@ -2773,7 +2787,6 @@ namespace Try_To_ESCAPE_GAME
         {
             if ( Sound =="Si" || Sound == "")
             {
-                SoundPlayer Do = new SoundPlayer(Properties.Resources.Do);
                 Do.Play();//  lance le son "do"
                 if (Sound == "Si")
                 {
@@ -2860,7 +2873,6 @@ namespace Try_To_ESCAPE_GAME
             if (Sound == "Re")
             {
                 Sound = "Mi";
-                SoundPlayer Mi = new SoundPlayer(Properties.Resources.Mi);
                 Mi.Play();// lance le son "mi"
             }
             else
@@ -2896,7 +2908,6 @@ namespace Try_To_ESCAPE_GAME
             if (Sound == "Mi")
             {
                 Sound = "Fa";
-                SoundPlayer Fa = new SoundPlayer(Properties.Resources.Fa);
                 Fa.Play(); // lance le son "fa"
             }
             else
@@ -2932,7 +2943,6 @@ namespace Try_To_ESCAPE_GAME
             if (Sound == "Fa")
             {
                 Sound = "Sol";
-                SoundPlayer Sol = new SoundPlayer(Properties.Resources.Sol);
                 Sol.Play(); // lance le son "sol"
             }
             else
@@ -2968,7 +2978,6 @@ namespace Try_To_ESCAPE_GAME
             if (Sound == "Sol")
             {
                 Sound = "La";
-                SoundPlayer La = new SoundPlayer(Properties.Resources.La);
                 La.Play(); // lance le son "la"
             }
             else
@@ -3004,7 +3013,6 @@ namespace Try_To_ESCAPE_GAME
             if (Sound == "La")
             {
                 Sound = "Si";
-                SoundPlayer Si = new SoundPlayer(Properties.Resources.Si);
                 Si.Play(); // lance le son "si"
             }
             else
@@ -3040,7 +3048,6 @@ namespace Try_To_ESCAPE_GAME
             if (Sound == "Do")
             {
                 Sound = "Re";
-                SoundPlayer Re = new SoundPlayer(Properties.Resources.Re);
                 Re.Play(); // lance le son "re"
             }
             else
@@ -3085,7 +3092,6 @@ namespace Try_To_ESCAPE_GAME
                 if (langue == "fr"){
                     textUse = "LE SORCIER FOU !\n\nBravo !  Vous avez réussi cette troisième épreuve avec brio !\nMaintenant place à la quatrième énigme...";
                     var result = CustomDialogForm.Show(textUse, langue);
-                    SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                     Zelda.Play(); // lance le son de "zelda"
                     textUse = "LE SORCIER FOU !\n\nVous devrez changer de salle...\nET TROUVER LE BOUTON QUI SI CACHE !!!\n... et j'espere qu'on se reverra bientôt... \nEt pour info, les prochaines salle vous devrez vous passer de mon aide et devrez trouver l'énigme avant de la résoudre.";
                     var r = CustomDialogForm.Show(textUse, langue);
@@ -3094,7 +3100,6 @@ namespace Try_To_ESCAPE_GAME
                 {
                     textUse = "¡EL MAGO LOCO!\n\nBravo !  Muy bien.  Has superado esta tercera prueba con nota.\nAhora es el momento del cuarto acertijo...";
                     var result = CustomDialogForm.Show(textUse, langue);
-                    SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                     Zelda.Play(); // lance le son de "zelda"
                     textUse = "¡EL MAGO LOCO!\n\nTendrás que cambiar de habitación...\n¡¡¡Y ENCUENTRA EL BOTÓN OCULTO !!!\n... y espero que nos volvamos a ver pronto... \nY para que lo sepas, en las próximas salas no necesitarás mi ayuda y tendrás que encontrar el acertijo antes de resolverlo.";
                     var r = CustomDialogForm.Show(textUse, langue);
@@ -3103,7 +3108,6 @@ namespace Try_To_ESCAPE_GAME
                 {
                     textUse = "THE MAD WIZARD!\n\nCongratulations!  You've passed this third test with flying colors!\nNow it's time for the fourth riddle...";
                     var result = CustomDialogForm.Show(textUse, langue);
-                    SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                     Zelda.Play(); // lance le son de "zelda"
                     textUse = "THE MAD WIZARD!\n\nYou'll have to change rooms...\nAND FIND THE HIDDEN BUTTON!!!\n... and I hope to see you soon...\nAnd just so you know, for the next few rooms you'll have to do without my help and will have to find the riddle before you can solve it.";
                     var r = CustomDialogForm.Show(textUse, langue);
@@ -3112,7 +3116,6 @@ namespace Try_To_ESCAPE_GAME
                 {
                     textUse = "الساحر المجنون\n\nأحسنت صنعا  لقد نجحت في هذا الاختبار الثالث بامتياز\n...والآن حان وقت اللغز الرابع";
                     var result = CustomDialogForm.Show(textUse, langue);
-                    SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                     Zelda.Play(); // lance le son de "zelda"
                     textUse = "الساحر المجنون\n\n...سيكون عليك تغيير الغرف\nوالعثور على الزر المخفي\n... وآمل أن نرى بعضنا البعض مرة أخرى قريبًا...\nولعلمك فقط، في الغرف القليلة القادمة لن تحتاج إلى مساعدتي وسيكون عليك إيجاد اللغز قبل حله";
                     var r = CustomDialogForm.Show(textUse, langue);
@@ -3820,7 +3823,6 @@ namespace Try_To_ESCAPE_GAME
             {
                 parler = true;
                 stopRun();
-                SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                 Zelda.Play(); // lance le son zelda
                 Target1.Visible = false;
                 if (langue == "fr")
@@ -3862,7 +3864,6 @@ namespace Try_To_ESCAPE_GAME
                         if (langue == "fr"){
                             textUse = "Vous avez Trouvé...";
                             var result = CustomDialogForm.Show(textUse, langue);
-                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                             Zelda.Play();
                             textUse = "Un MARTEAU !";
                             var r = CustomDialogForm.Show(textUse, langue);
@@ -3871,7 +3872,6 @@ namespace Try_To_ESCAPE_GAME
                         {
                             textUse = "Te has recuperado...";
                             var result = CustomDialogForm.Show(textUse, langue);
-                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                             Zelda.Play();
                             textUse = "¡UN MARTILLO!";
                             var r = CustomDialogForm.Show(textUse, langue);
@@ -3880,7 +3880,6 @@ namespace Try_To_ESCAPE_GAME
                         {
                             textUse = "لقد تعافيت...";
                             var result = CustomDialogForm.Show(textUse, langue);
-                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                             Zelda.Play();
                             textUse = "مطرقة";
                             var r = CustomDialogForm.Show(textUse, langue);
@@ -3889,7 +3888,6 @@ namespace Try_To_ESCAPE_GAME
                         {
                             textUse = "You've recovered...";
                             var result = CustomDialogForm.Show(textUse, langue);
-                            SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                             Zelda.Play();
                             textUse = "A HAMMER!";
                             var r = CustomDialogForm.Show(textUse, langue);
@@ -4135,7 +4133,6 @@ namespace Try_To_ESCAPE_GAME
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && Paper1.Visible == true) // si on récupère le premier papier 
                     {
                         stopRun();
-                        SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                         Zelda.Play();
                         papier = papier + 1;
                         if (langue == "fr")
@@ -4178,7 +4175,6 @@ namespace Try_To_ESCAPE_GAME
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && Papier2.Visible == true) // si on récupère le deuxième papier
                     {
                         stopRun();
-                        SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                         Zelda.Play();
                         papier = papier + 1;
                         if (langue == "fr")
@@ -4220,7 +4216,6 @@ namespace Try_To_ESCAPE_GAME
                     if (player.Bounds.IntersectsWith(x.Bounds) && interact == true && Papier3.Visible == true) // si on récupère le troisième papier
                     {
                         stopRun();
-                        SoundPlayer Zelda = new SoundPlayer(Properties.Resources.Item_get_zelda);
                         Zelda.Play();
                         papier = papier + 1;
                         if (langue == "fr")
@@ -4381,28 +4376,24 @@ namespace Try_To_ESCAPE_GAME
                     {
                         stopRun();
                         if (langue == "fr"){
-                            SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__2_);
                             chadi.Play();
                             textUse = "???\n\nBonjour je vois que vous venez de réussir la première épreuve ! Félicitation !\nMaintenant passons à la deuxième épreuve !\nVous devrez répondre à des questions !\nÊtes Vous Prêts  ?!";
                             var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "es")
                         {
-                            SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__8_);
                             chadi.Play();
                             textUse = "???\n\nHola, veo que acabas de pasar la primera prueba. Te felicito.\nAhora pasemos a la segunda prueba.\nTendrás que responder a algunas preguntas.\n¿Estás preparado?";
                             var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "en")
                         {
-                            SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__4_);
                             chadi.Play();
                             textUse = "???\n\nHello, I see you've just passed the first test! Congratulations!\nNow let's move on to the second test!\nYou'll have to answer questions!\nAre you ready?!";
                             var result = CustomDialogForm.Show(textUse, langue);
                         }
                         if (langue == "ar")
                         {
-                            SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__6_);
                             chadi.Play();
                             textUse = "???\n\nمرحباً، أرى أنك اجتزت الاختبار الأول! تهانينا\nوالآن لننتقل إلى الاختبار الثاني\nسيكون عليك الإجابة عن بعض الأسئلة\nهل أنت جاهز؟";
                             var result = CustomDialogForm.Show(textUse, langue);
@@ -4465,7 +4456,6 @@ namespace Try_To_ESCAPE_GAME
                         if (rage <= 3){
                             stopRun();
                             if (langue == "fr"){
-                                SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement);
                                 chadi.Play();
                                 textUse = "???\n\nJe ne croix pas que vous ayez les connaissances nécéssaires." +
                                     "\nRevennez plus tard...";
@@ -4473,7 +4463,6 @@ namespace Try_To_ESCAPE_GAME
                             }
                             if (langue == "en")
                             {
-                                SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__3_);
                                 chadi.Play();
                                 textUse = "???\n\nI don't think you have the necessary knowledge." +
                                     "\nCome back later...";
@@ -4481,7 +4470,6 @@ namespace Try_To_ESCAPE_GAME
                             }
                             if (langue == "es")
                             {
-                                SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__7_);
                                 chadi.Play();
                                 textUse = "???\n\nNo creo que tengas los conocimientos necesarios." +
                                     "\nVuelve más tarde...";
@@ -4489,7 +4477,6 @@ namespace Try_To_ESCAPE_GAME
                             }
                             if (langue == "ar")
                             {
-                                SoundPlayer chadi = new SoundPlayer(Properties.Resources.Enregistrement__5_);
                                 chadi.Play();
                                 textUse = "???\n\nلا أعتقد أن لديك المعرفة اللازمة" +
                                     "\nعُد لاحقاً";
